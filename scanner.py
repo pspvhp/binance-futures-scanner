@@ -321,15 +321,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Binance Futures Scanner</title>
+    <title>Binance Futures Scanner | CryptoRank Screener Style</title>
     <style>
         :root {
             --bg: #0b0e14;
-            --card-bg: #151a24;
-            --card-hover: #1c2230;
+            --surface: #121721;
+            --surface-hover: #19202e;
             --border: #222b3d;
+            --border-active: #3b82f6;
             --text: #eaecef;
             --text-dim: #848e9c;
+            --accent: #2563eb;
+            --accent-light: rgba(37, 99, 235, 0.15);
             --green: #0ecb81;
             --green-bg: rgba(14, 203, 129, 0.12);
             --red: #f6465d;
@@ -339,82 +342,142 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             --purple: #b388ff;
             --purple-bg: rgba(179, 136, 255, 0.12);
             --orange: #ff9800;
-            --orange-bg: rgba(255, 152, 0, 0.15);
-            --blue: #2962ff;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); padding: 14px 14px 90px 14px; min-height: 100vh; font-size: 13px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); padding: 14px 14px 90px 14px; min-height: 100vh; font-size: 13px; line-height: 1.4; }
         
         /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         .title-group h1 { font-size: 18px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px; }
         .live-tag { display: inline-flex; align-items: center; gap: 4px; background: rgba(14, 203, 129, 0.15); color: var(--green); padding: 2px 7px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid rgba(14, 203, 129, 0.3); }
         .live-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 6px var(--green); }
-        .utc-badge { background: #2962ff25; color: #64b5f6; border: 1px solid #2962ff55; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; }
+        .utc-badge { background: #2563eb25; color: #60a5fa; border: 1px solid #2563eb55; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; }
         .header-meta { font-size: 11.5px; color: var(--text-dim); }
 
-        /* STATS BAR */
+        /* CRYPTORANK MARKET STATS STRIP */
         .stats-grid { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 12px; padding-bottom: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
-        .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; min-width: 130px; flex: 1 0 auto; scroll-snap-align: start; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; min-width: 130px; flex: 1 0 auto; scroll-snap-align: start; }
         .stat-label { color: var(--text-dim); font-size: 11px; margin-bottom: 2px; }
-        .stat-value { font-size: 17px; font-weight: 700; }
+        .stat-value { font-size: 16px; font-weight: 700; }
         .stat-value.green { color: var(--green); }
         .stat-value.red { color: var(--red); }
-        .stat-value.yellow { color: var(--yellow); }
-        .stat-value.blue { color: #64b5f6; }
+        .stat-value.blue { color: #60a5fa; }
         .stat-value.orange { color: var(--orange); }
         .stat-sub { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
 
-        /* COLLAPSIBLE FILTERS */
-        .config-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; box-shadow: 0 3px 14px rgba(0,0,0,0.25); overflow: hidden; }
-        .config-toggle-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; cursor: pointer; user-select: none; background: #131822; }
-        .config-toggle-header.active { border-bottom: 1px solid var(--border); }
-        .config-toggle-title { font-size: 12.5px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px; }
-        .config-badge { background: rgba(240, 185, 11, 0.15); color: var(--yellow); border: 1px solid rgba(240, 185, 11, 0.3); padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-        .config-arrow { font-size: 11px; color: var(--text-dim); transition: transform 0.2s; }
-        .config-arrow.open { transform: rotate(180deg); }
-        .config-body { padding: 12px 14px; display: block; }
-        .config-body.collapsed { display: none; }
+        /* ================= CRYPTORANK FILTER DECK ================= */
+        .cr-filter-deck {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+        }
+        .cr-chips-scroll {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .cr-chips-scroll::-webkit-scrollbar { display: none; }
 
-        .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
-        .config-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+        /* DROPDOWN WRAPPER & CHIPS */
+        .cr-dropdown-wrap { position: relative; display: inline-block; }
+        .cr-chip {
+            background: #18202d;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            transition: all 0.15s;
+            user-select: none;
+            min-height: 34px;
+        }
+        .cr-chip:hover { background: #222c3d; border-color: #3b4b66; color: #fff; }
+        .cr-chip.active-chip { background: var(--accent-light); border-color: var(--border-active); color: #93c5fd; font-weight: 700; }
+        .cr-arrow { font-size: 10px; color: var(--text-dim); transition: transform 0.2s; }
+        .cr-chip.open .cr-arrow { transform: rotate(180deg); }
+
+        /* CRYPTORANK POPOVER CARD */
+        .cr-popover {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            background: #141a24;
+            border: 1px solid #2d384e;
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            z-index: 1000;
+            display: none;
+            min-width: 220px;
+            animation: fadeIn 0.15s ease-out;
+        }
+        .cr-popover.show { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+        .cr-popover-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px; }
+        .cr-popover-title { font-size: 11.5px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .pill-group { display: flex; gap: 5px; flex-wrap: wrap; }
-        .pill-btn { padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); background: #19202e; color: var(--text); cursor: pointer; font-size: 11.5px; font-weight: 600; transition: all 0.15s; user-select: none; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; }
-        .pill-btn:hover { background: #232c40; color: #fff; border-color: #3e4c6b; }
-        .pill-btn.active { background: var(--yellow); color: #000; border-color: var(--yellow); font-weight: 700; }
+        .cr-popover-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 6px; }
+        .cr-preset-btn { background: #19202e; border: 1px solid var(--border); color: var(--text); padding: 7px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; }
+        .cr-preset-btn:hover { background: #232c40; color: #fff; }
+        .cr-preset-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
 
-        .cond-btn.active.cond-above { background: var(--green); color: #000; border-color: var(--green); }
-        .cond-btn.active.cond-below { background: var(--red); color: #fff; border-color: var(--red); }
-        .cond-btn.active.cond-all { background: var(--yellow); color: #000; border-color: var(--yellow); }
+        .cr-popover-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+        .cr-list-btn { background: transparent; border: none; color: var(--text); padding: 7px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; text-align: left; display: flex; align-items: center; justify-content: space-between; }
+        .cr-list-btn:hover { background: #1d2535; color: #fff; }
+        .cr-list-btn.active { background: var(--accent-light); color: #93c5fd; font-weight: 700; }
 
-        .filter-select { padding: 6px 9px; border-radius: 6px; border: 1px solid var(--border); background: #19202e; color: #fff; font-size: 13.5px; outline: none; width: 100%; cursor: pointer; min-height: 36px; }
-        .filter-select:focus { border-color: var(--yellow); }
+        .cr-inputs-row { display: flex; gap: 6px; align-items: center; margin-top: 6px; margin-bottom: 8px; }
+        .cr-input { flex: 1; padding: 7px 9px; border-radius: 6px; border: 1px solid var(--border); background: #18202d; color: #fff; font-size: 13px; outline: none; }
+        .cr-input:focus { border-color: var(--border-active); }
 
-        .mc-inputs-row { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; }
-        .input-box { flex: 1; padding: 6px 9px; border-radius: 6px; border: 1px solid var(--border); background: #19202e; color: #fff; font-size: 13.5px; outline: none; min-height: 34px; }
-        .input-box:focus { border-color: var(--yellow); }
+        .cr-presets-row { display: flex; gap: 5px; flex-wrap: wrap; }
+        .cr-preset-tag { padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); background: #18202d; color: var(--text-dim); font-size: 11px; cursor: pointer; }
+        .cr-preset-tag:hover { color: #fff; border-color: #3e4c6b; }
 
-        /* PERCENT RANGE FILTERS GRID */
-        .pct-filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 7px; margin-top: 6px; }
-        .pct-filter-item { display: flex; align-items: center; gap: 5px; background: #19202e; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border); }
-        .pct-filter-name { font-size: 11px; font-weight: 700; color: #fff; min-width: 62px; }
-        .pct-input { width: 58px; padding: 4px 6px; font-size: 12.5px; min-height: 28px; text-align: center; }
+        /* RANGES GRID */
+        .cr-ranges-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+        .cr-range-row { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
+        .cr-range-label { font-size: 11.5px; font-weight: 600; color: #fff; min-width: 72px; }
+        .cr-input-sm { width: 70px; padding: 5px 6px; font-size: 12px; text-align: center; border-radius: 6px; border: 1px solid var(--border); background: #18202d; color: #fff; outline: none; }
+        .cr-input-sm:focus { border-color: var(--border-active); }
 
-        .action-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); justify-content: space-between; }
-        .btn-main { background: var(--yellow); color: #000; font-weight: 700; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 12.5px; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; }
-        .btn-main:active { transform: scale(0.98); }
-        .btn-secondary { background: #19202e; color: var(--text); padding: 8px 13px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; font-size: 12.5px; font-weight: 600; }
+        .cr-link-btn { background: transparent; border: none; color: var(--yellow); font-size: 11px; cursor: pointer; font-weight: 600; }
 
-        /* CONTROLS */
+        .cr-reset-all { background: transparent; border: 1px dashed var(--border); color: var(--text-dim); padding: 7px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; margin-left: auto; }
+        .cr-reset-all:hover { color: var(--yellow); border-color: var(--yellow); }
+
+        /* ACTIVE FILTER TAGS ROW (CRYPTORANK SIGNATURE) */
+        .cr-active-tags-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); min-height: 28px; }
+        .cr-tag { background: #1e2638; border: 1px solid #32405d; color: #cbd5e1; border-radius: 14px; padding: 2px 8px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+        .cr-tag-remove { cursor: pointer; color: var(--text-dim); font-size: 12px; line-height: 1; }
+        .cr-tag-remove:hover { color: #f87171; }
+
+        /* CONTROLS & ACTIONS */
         .controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
         .controls-left { display: flex; gap: 8px; align-items: center; flex: 1; min-width: 200px; }
-        .search-box { flex: 1; padding: 8px 11px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: #fff; font-size: 13.5px; outline: none; min-height: 36px; }
-        .search-box:focus { border-color: var(--yellow); }
+        .search-box { flex: 1; padding: 8px 11px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: #fff; font-size: 13.5px; outline: none; min-height: 36px; }
+        .search-box:focus { border-color: var(--border-active); }
 
-        .view-switch { display: inline-flex; background: #19202e; border: 1px solid var(--border); border-radius: 6px; padding: 2px; }
+        .view-switch { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 2px; }
         .view-btn { padding: 5px 10px; border-radius: 4px; border: none; background: transparent; color: var(--text-dim); font-size: 11.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
         .view-btn.active { background: #232c40; color: #fff; }
+
+        .btn-export { background: #18202d; border: 1px solid var(--border); color: var(--text); padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .btn-export:hover { background: #232c40; color: #fff; }
 
         /* BADGES */
         .pill-tag { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
@@ -433,18 +496,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .symbol-cell { font-weight: 700; color: #fff; font-size: 13.5px; }
         .symbol-sub { font-size: 10px; color: var(--text-dim); margin-left: 2px; }
 
-        /* CARDS */
+        /* CARDS VIEW */
         .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 9px; }
-        .crypto-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; transition: all 0.15s; }
-        .crypto-card:hover { border-color: #3e4c6b; background: var(--card-hover); }
+        .crypto-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; transition: all 0.15s; }
+        .crypto-card:hover { border-color: #3b4b66; background: var(--surface-hover); }
         
         .card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
         .card-sym-title { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 5px; }
         .card-price-display { font-size: 15px; font-weight: 700; color: #fff; }
 
         .card-focus-bar {
-            background: rgba(41, 98, 255, 0.08);
-            border: 1px solid rgba(41, 98, 255, 0.22);
+            background: rgba(37, 99, 235, 0.08);
+            border: 1px solid rgba(37, 99, 235, 0.22);
             border-radius: 7px;
             padding: 7px 9px;
             margin-bottom: 7px;
@@ -466,26 +529,26 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }
 
         .tf-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; }
-        .tf-tile { background: #19202e; border-radius: 5px; padding: 4px 2px; text-align: center; border: 1px solid var(--border); }
+        .tf-tile { background: #18202d; border-radius: 5px; padding: 4px 2px; text-align: center; border: 1px solid var(--border); }
         .tf-tile-name { font-size: 9px; color: var(--text-dim); font-weight: 700; margin-bottom: 1px; }
         .tf-tile-val { font-size: 11px; font-weight: 700; white-space: nowrap; }
-        .tf-tile.highlight { border-color: var(--yellow); box-shadow: 0 0 5px rgba(240, 185, 11, 0.3); }
+        .tf-tile.highlight { border-color: var(--border-active); box-shadow: 0 0 5px rgba(59, 130, 246, 0.4); }
 
-        /* TABLE */
-        .table-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        /* TABLE VIEW */
+        .table-container { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12.5px; }
-        th { background: #171d29; padding: 9px 11px; color: var(--text-dim); font-weight: 600; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        th { background: #161c27; padding: 9px 11px; color: var(--text-dim); font-weight: 600; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); white-space: nowrap; }
         th:hover { color: #fff; }
         th.active-sort { color: var(--yellow); }
-        th.col-focus { background: #1a2538; color: #fff; }
+        th.col-focus { background: #1a2232; color: #fff; }
         td { padding: 9px 11px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-        td.col-focus { background: rgba(41, 98, 255, 0.05); }
-        tr:hover td { background: var(--card-hover); }
+        td.col-focus { background: rgba(37, 99, 235, 0.05); }
+        tr:hover td { background: var(--surface-hover); }
 
         /* STICKY COLUMNS */
-        th.col-sticky-1, td.col-sticky-1 { position: sticky; left: 0; z-index: 3; background: #151a24; width: 30px; text-align: center; }
-        th.col-sticky-2, td.col-sticky-2 { position: sticky; left: 30px; z-index: 3; background: #151a24; box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
-        th.col-sticky-1, th.col-sticky-2 { background: #171d29; z-index: 4; }
+        th.col-sticky-1, td.col-sticky-1 { position: sticky; left: 0; z-index: 3; background: #121721; width: 30px; text-align: center; }
+        th.col-sticky-2, td.col-sticky-2 { position: sticky; left: 30px; z-index: 3; background: #121721; box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
+        th.col-sticky-1, th.col-sticky-2 { background: #161c27; z-index: 4; }
 
         /* FAB */
         .fab-rescan {
@@ -518,10 +581,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         @media (max-width: 768px) {
             body { padding: 10px 8px 80px 8px; }
             .header h1 { font-size: 16px; }
-            .search-box, .filter-select, .input-box { font-size: 16px !important; }
+            .search-box, .cr-input { font-size: 16px !important; }
             .tf-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
-            .pct-filter-grid { grid-template-columns: 1fr 1fr; gap: 5px; }
-            .pct-input { width: 44px; font-size: 14px !important; }
+            .cr-popover { position: fixed; top: auto; bottom: 0; left: 0; right: 0; width: 100%; border-radius: 16px 16px 0 0; border: 1px solid #334155; padding: 16px; z-index: 10000; max-height: 80vh; overflow-y: auto; }
         }
     </style>
 </head>
@@ -534,7 +596,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         <div class="header-meta" id="lastScanTime">Syncing...</div>
     </div>
 
-    <!-- STATS -->
+    <!-- STATS BAR -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-label">Total Pairs</div>
@@ -563,161 +625,177 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- COLLAPSIBLE FILTERS -->
-    <div class="config-card">
-        <div class="config-toggle-header" id="configHeader" onclick="toggleConfig()">
-            <div class="config-toggle-title">
-                <span>⚙️ Filters</span>
-                <span class="config-badge" id="activeConfigSummary">1W | > Open</span>
+    <!-- ================= CRYPTORANK STYLE FILTER DECK ================= -->
+    <div class="cr-filter-deck">
+        <div class="cr-chips-scroll">
+            <!-- 1. Timeframe Chip -->
+            <div class="cr-dropdown-wrap">
+                <button class="cr-chip active-chip" id="btnChipTf" onclick="togglePopover('pop_tf')">
+                    <span>⏱️ Timeframe: <b id="chipTfText">1W</b></span>
+                    <span class="cr-arrow">▾</span>
+                </button>
+                <div class="cr-popover" id="pop_tf">
+                    <div class="cr-popover-title">Focus Timeframe (UTC 00:00)</div>
+                    <div class="cr-popover-grid">
+                        <button class="cr-preset-btn" data-tf="1d" onclick="selectTf('1d')">1D (Daily)</button>
+                        <button class="cr-preset-btn active" data-tf="1w" onclick="selectTf('1w')">1W (Weekly)</button>
+                        <button class="cr-preset-btn" data-tf="2w" onclick="selectTf('2w')">2W (14 Days)</button>
+                        <button class="cr-preset-btn" data-tf="1m" onclick="selectTf('1m')">1M (Monthly)</button>
+                        <button class="cr-preset-btn" data-tf="3m" onclick="selectTf('3m')">3M (Quarter)</button>
+                        <button class="cr-preset-btn" data-tf="6m" onclick="selectTf('6m')">6M (Semi-annual)</button>
+                    </div>
+                </div>
             </div>
-            <div class="config-arrow" id="configArrow">▼</div>
-        </div>
-        
-        <div class="config-body" id="configBody">
-            <div class="config-grid">
-                <!-- 1. Timeframe -->
-                <div>
-                    <div class="config-section-title">⏱️ 1. Focus Timeframe (UTC)</div>
-                    <div class="pill-group" id="tfGroup">
-                        <button class="pill-btn" data-tf="1d" onclick="selectFilterTf('1d')">1D</button>
-                        <button class="pill-btn active" data-tf="1w" onclick="selectFilterTf('1w')">1W</button>
-                        <button class="pill-btn" data-tf="2w" onclick="selectFilterTf('2w')">2W</button>
-                        <button class="pill-btn" data-tf="1m" onclick="selectFilterTf('1m')">1M</button>
-                        <button class="pill-btn" data-tf="3m" onclick="selectFilterTf('3m')">3M</button>
-                        <button class="pill-btn" data-tf="6m" onclick="selectFilterTf('6m')">6M</button>
+
+            <!-- 2. Position Condition Chip -->
+            <div class="cr-dropdown-wrap">
+                <button class="cr-chip active-chip" id="btnChipCond" onclick="togglePopover('pop_cond')">
+                    <span id="chipCondText">🟢 > Open</span>
+                    <span class="cr-arrow">▾</span>
+                </button>
+                <div class="cr-popover" id="pop_cond">
+                    <div class="cr-popover-title">Position vs Open Price</div>
+                    <div class="cr-popover-list">
+                        <button class="cr-list-btn active" data-cond="above" onclick="selectCond('above')">🟢 Above Open (Bull)</button>
+                        <button class="cr-list-btn" data-cond="below" onclick="selectCond('below')">🔴 Below Open (Bear)</button>
+                        <button class="cr-list-btn" data-cond="all" onclick="selectCond('all')">⚪ All Positions</button>
                     </div>
                 </div>
+            </div>
 
-                <!-- 2. Position Condition -->
-                <div>
-                    <div class="config-section-title">🎯 2. Price Position</div>
-                    <div class="pill-group" id="condGroup">
-                        <button class="pill-btn cond-btn active cond-above" data-cond="above" onclick="selectFilterCond('above')">🟢 > Open</button>
-                        <button class="pill-btn cond-btn cond-below" data-cond="below" onclick="selectFilterCond('below')">🔴 < Open</button>
-                        <button class="pill-btn cond-btn cond-all" data-cond="all" onclick="selectFilterCond('all')">⚪ All</button>
-                    </div>
-                </div>
-
-                <!-- 3. Market Cap -->
-                <div>
-                    <div class="config-section-title">
-                        <span>💎 3. Market Cap</span>
-                        <span style="color:#b388ff; font-size:11px;" id="mcActiveLabel">All</span>
-                    </div>
-                    <div class="mc-inputs-row">
-                        <input type="text" id="minMcInput" class="input-box" placeholder="Min (e.g. 50M)" oninput="onMcInput()">
+            <!-- 3. Market Cap Chip -->
+            <div class="cr-dropdown-wrap">
+                <button class="cr-chip" id="btnChipMc" onclick="togglePopover('pop_mc')">
+                    <span id="chipMcText">💎 Market Cap</span>
+                    <span class="cr-arrow">▾</span>
+                </button>
+                <div class="cr-popover" id="pop_mc" style="min-width: 270px;">
+                    <div class="cr-popover-title">Market Cap Range (USD)</div>
+                    <div class="cr-inputs-row">
+                        <input type="text" id="minMcInput" class="cr-input" placeholder="Min (50M)" oninput="onMcChange()">
                         <span style="color:var(--text-dim);">-</span>
-                        <input type="text" id="maxMcInput" class="input-box" placeholder="Max (e.g. 1B)" oninput="onMcInput()">
+                        <input type="text" id="maxMcInput" class="cr-input" placeholder="Max (1B)" oninput="onMcChange()">
                     </div>
-                    <div class="pill-group">
-                        <button class="pill-btn" style="padding:2px 7px; font-size:11px;" onclick="setMcPreset(0, 0)">All</button>
-                        <button class="pill-btn" style="padding:2px 7px; font-size:11px;" onclick="setMcPreset(0, 50e6)">&lt;50M</button>
-                        <button class="pill-btn" style="padding:2px 7px; font-size:11px;" onclick="setMcPreset(50e6, 300e6)">50M-300M</button>
-                        <button class="pill-btn" style="padding:2px 7px; font-size:11px;" onclick="setMcPreset(300e6, 1e9)">300M-1B</button>
-                        <button class="pill-btn" style="padding:2px 7px; font-size:11px;" onclick="setMcPreset(1e9, 0)">&gt;1B</button>
-                    </div>
-                </div>
-
-                <!-- 4. Funding Rate & Volume -->
-                <div>
-                    <div class="config-section-title">⚡ 4. Funding Rate & 24h Vol</div>
-                    <div style="display:flex; gap:6px;">
-                        <select id="frSelect" class="filter-select" onchange="renderView()" style="flex:1;">
-                            <option value="all">All FR</option>
-                            <option value="neg">🔥 Neg FR (&lt;0%)</option>
-                            <option value="neg_deep">⚠️ Deep Neg (&lt;-0.05%)</option>
-                            <option value="pos">📈 Pos FR (&gt;0%)</option>
-                            <option value="pos_high">⚡ High Pos (&gt;0.03%)</option>
-                        </select>
-                        <select id="minVolSelect" class="filter-select" onchange="renderView()" style="flex:1;">
-                            <option value="0">All Vol</option>
-                            <option value="1000000">&gt;$1M</option>
-                            <option value="5000000">&gt;$5M</option>
-                            <option value="20000000">&gt;$20M</option>
-                        </select>
+                    <div class="cr-presets-row">
+                        <button class="cr-preset-tag" onclick="setMcPreset(0, 0)">All</button>
+                        <button class="cr-preset-tag" onclick="setMcPreset(0, 50e6)">&lt;$50M</button>
+                        <button class="cr-preset-tag" onclick="setMcPreset(50e6, 300e6)">$50M-$300M</button>
+                        <button class="cr-preset-tag" onclick="setMcPreset(300e6, 1e9)">$300M-$1B</button>
+                        <button class="cr-preset-tag" onclick="setMcPreset(1e9, 0)">&gt;$1B</button>
                     </div>
                 </div>
+            </div>
 
-                <!-- 5. Timeframe % & Dev % Ranges -->
-                <div style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 10px; margin-top: 2px;">
-                    <div class="config-section-title">
-                        <span>📊 5. Custom % Ranges (Dev from Open & Individual Timeframes)</span>
-                        <button class="pill-btn" style="padding: 2px 8px; font-size: 11px; color: var(--yellow); min-height:24px;" onclick="resetRangeFilters()">↺ Reset %</button>
+            <!-- 4. Funding Rate Chip -->
+            <div class="cr-dropdown-wrap">
+                <button class="cr-chip" id="btnChipFr" onclick="togglePopover('pop_fr')">
+                    <span id="chipFrText">⚡ Funding Rate</span>
+                    <span class="cr-arrow">▾</span>
+                </button>
+                <div class="cr-popover" id="pop_fr">
+                    <div class="cr-popover-title">Binance Funding Rate</div>
+                    <div class="cr-popover-list">
+                        <button class="cr-list-btn active" data-fr="all" onclick="selectFr('all')">All Funding Rates</button>
+                        <button class="cr-list-btn" data-fr="neg" onclick="selectFr('neg')">🔥 Negative FR (&lt;0%)</button>
+                        <button class="cr-list-btn" data-fr="neg_deep" onclick="selectFr('neg_deep')">⚠️ Deep Neg (&lt;-0.05%) Squeeze</button>
+                        <button class="cr-list-btn" data-fr="pos" onclick="selectFr('pos')">📈 Positive FR (&gt;0%)</button>
+                        <button class="cr-list-btn" data-fr="pos_high" onclick="selectFr('pos_high')">⚡ High Positive (&gt;0.03%)</button>
                     </div>
-                    <div class="pct-filter-grid">
-                        <!-- Dev from Open of focus TF -->
-                        <div class="pct-filter-item">
-                            <span class="pct-filter-name" id="pctDevLabel">Dev. %</span>
-                            <input type="number" step="any" id="min_dev_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
-                            <span style="color:var(--text-dim); font-size:11px;">-</span>
-                            <input type="number" step="any" id="max_dev_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                </div>
+            </div>
+
+            <!-- 5. 24h Volume Chip -->
+            <div class="cr-dropdown-wrap">
+                <button class="cr-chip" id="btnChipVol" onclick="togglePopover('pop_vol')">
+                    <span id="chipVolText">📊 24h Volume</span>
+                    <span class="cr-arrow">▾</span>
+                </button>
+                <div class="cr-popover" id="pop_vol">
+                    <div class="cr-popover-title">24h Trading Volume</div>
+                    <div class="cr-popover-list">
+                        <button class="cr-list-btn active" data-vol="0" onclick="selectVol(0)">All Volumes</button>
+                        <button class="cr-list-btn" data-vol="1000000" onclick="selectVol(1000000)">&gt; $1M Volume</button>
+                        <button class="cr-list-btn" data-vol="5000000" onclick="selectVol(5000000)">&gt; $5M Volume</button>
+                        <button class="cr-list-btn" data-vol="20000000" onclick="selectVol(20000000)">&gt; $20M Volume</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Custom % Ranges Chip -->
+            <div class="cr-dropdown-wrap">
+                <button class="cr-chip" id="btnChipRanges" onclick="togglePopover('pop_ranges')">
+                    <span id="chipRangesText">📈 % Performance</span>
+                    <span class="cr-arrow">▾</span>
+                </button>
+                <div class="cr-popover" id="pop_ranges" style="min-width: 300px;">
+                    <div class="cr-popover-header">
+                        <div class="cr-popover-title">Performance % Filters</div>
+                        <button class="cr-link-btn" onclick="resetRangeFilters()">Reset</button>
+                    </div>
+                    <div class="cr-ranges-grid">
+                        <div class="cr-range-row">
+                            <span class="cr-range-label" id="crDevLabel">Dev. %</span>
+                            <input type="number" step="any" id="min_dev_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
+                            <span>-</span>
+                            <input type="number" step="any" id="max_dev_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
                         </div>
-                        <!-- 1D -->
-                        <div class="pct-filter-item">
-                            <span class="pct-filter-name">1D (24h)</span>
-                            <input type="number" step="any" id="min_1d_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
-                            <span style="color:var(--text-dim); font-size:11px;">-</span>
-                            <input type="number" step="any" id="max_1d_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        <div class="cr-range-row">
+                            <span class="cr-range-label">1D (24h)</span>
+                            <input type="number" step="any" id="min_1d_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
+                            <span>-</span>
+                            <input type="number" step="any" id="max_1d_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
                         </div>
-                        <!-- 1W (7D) -->
-                        <div class="pct-filter-item">
-                            <span class="pct-filter-name">1W (7d)</span>
-                            <input type="number" step="any" id="min_1w_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
-                            <span style="color:var(--text-dim); font-size:11px;">-</span>
-                            <input type="number" step="any" id="max_1w_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        <div class="cr-range-row">
+                            <span class="cr-range-label">1W (7d)</span>
+                            <input type="number" step="any" id="min_1w_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
+                            <span>-</span>
+                            <input type="number" step="any" id="max_1w_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
                         </div>
-                        <!-- 2W (14D) -->
-                        <div class="pct-filter-item">
-                            <span class="pct-filter-name">2W (14d)</span>
-                            <input type="number" step="any" id="min_2w_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
-                            <span style="color:var(--text-dim); font-size:11px;">-</span>
-                            <input type="number" step="any" id="max_2w_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        <div class="cr-range-row">
+                            <span class="cr-range-label">2W (14d)</span>
+                            <input type="number" step="any" id="min_2w_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
+                            <span>-</span>
+                            <input type="number" step="any" id="max_2w_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
                         </div>
-                        <!-- 1M (30D) -->
-                        <div class="pct-filter-item">
-                            <span class="pct-filter-name">1M (30d)</span>
-                            <input type="number" step="any" id="min_1m_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
-                            <span style="color:var(--text-dim); font-size:11px;">-</span>
-                            <input type="number" step="any" id="max_1m_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        <div class="cr-range-row">
+                            <span class="cr-range-label">1M (30d)</span>
+                            <input type="number" step="any" id="min_1m_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
+                            <span>-</span>
+                            <input type="number" step="any" id="max_1m_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
                         </div>
-                        <!-- 3M -->
-                        <div class="pct-filter-item">
-                            <span class="pct-filter-name">3M</span>
-                            <input type="number" step="any" id="min_3m_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
-                            <span style="color:var(--text-dim); font-size:11px;">-</span>
-                            <input type="number" step="any" id="max_3m_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        <div class="cr-range-row">
+                            <span class="cr-range-label">3M</span>
+                            <input type="number" step="any" id="min_3m_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
+                            <span>-</span>
+                            <input type="number" step="any" id="max_3m_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
                         </div>
-                        <!-- 6M -->
-                        <div class="pct-filter-item">
-                            <span class="pct-filter-name">6M</span>
-                            <input type="number" step="any" id="min_6m_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
-                            <span style="color:var(--text-dim); font-size:11px;">-</span>
-                            <input type="number" step="any" id="max_6m_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        <div class="cr-range-row">
+                            <span class="cr-range-label">6M</span>
+                            <input type="number" step="any" id="min_6m_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
+                            <span>-</span>
+                            <input type="number" step="any" id="max_6m_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="action-row">
-                <div style="font-size:11.5px; color:var(--text-dim);" id="deviceInfoTag">
-                    Auto-configured for your screen
-                </div>
-                <div style="display:flex; gap:6px;">
-                    <button class="btn-main" onclick="fetchScan(true)">🚀 Rescan</button>
-                    <button class="btn-secondary" onclick="exportCSV()">📥 CSV</button>
-                </div>
-            </div>
+            <!-- Reset All -->
+            <button class="cr-reset-all" onclick="resetAllFilters()">↺ Reset All</button>
         </div>
+
+        <!-- ACTIVE FILTER TAGS ROW -->
+        <div class="cr-active-tags-row" id="crActiveTags"></div>
     </div>
 
     <!-- CONTROLS -->
     <div class="controls">
         <div class="controls-left">
-            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search (BTC, SOL, SUI, PEPE...)" oninput="renderView()">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search token (BTC, SOL, SUI, PEPE...)" oninput="renderView()">
         </div>
-        <div style="display:flex; gap:8px; align-items:center; justify-content:space-between; width:100%;">
+        <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn-export" onclick="exportCSV()">📥 CSV</button>
             <div style="font-size:12.5px; font-weight:600; color:var(--text-dim);">
-                Pairs: <b style="color:#fff;" id="resultCount">0</b>
+                <b style="color:#fff;" id="resultCount">0</b> pairs
             </div>
             <!-- View Switcher -->
             <div class="view-switch">
@@ -772,30 +850,32 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         
         let currentFilterTf = '1w';
         let currentFilterCond = 'above';
+        let currentFilterFr = 'all';
+        let currentFilterVol = 0;
         let allTokens = [];
         let currentSort = { col: 'diff_pct', dir: 'desc' };
         let currentView = isMobile ? 'cards' : 'table';
 
-        // Auto collapse filters on mobile to preserve viewport space
-        if (isMobile) {
-            document.addEventListener('DOMContentLoaded', () => {
-                const body = document.getElementById('configBody');
-                if (body) body.classList.add('collapsed');
-                const arrow = document.getElementById('configArrow');
-                if (arrow) arrow.classList.remove('open');
-                const header = document.getElementById('configHeader');
-                if (header) header.classList.remove('active');
-                document.getElementById('deviceInfoTag').innerText = '📱 Mobile mode: Cards default';
-            });
+        // Close popovers on click outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.cr-dropdown-wrap')) {
+                closeAllPopovers();
+            }
+        });
+
+        function closeAllPopovers() {
+            document.querySelectorAll('.cr-popover').forEach(p => p.classList.remove('show'));
+            document.querySelectorAll('.cr-chip').forEach(c => c.classList.remove('open'));
         }
 
-        function toggleConfig() {
-            const body = document.getElementById('configBody');
-            const arrow = document.getElementById('configArrow');
-            const header = document.getElementById('configHeader');
-            const isCollapsed = body.classList.toggle('collapsed');
-            arrow.classList.toggle('open', !isCollapsed);
-            header.classList.toggle('active', !isCollapsed);
+        function togglePopover(id) {
+            const el = document.getElementById(id);
+            const isOpen = el.classList.contains('show');
+            closeAllPopovers();
+            if (!isOpen) {
+                el.classList.add('show');
+                el.parentElement.querySelector('.cr-chip').classList.add('open');
+            }
         }
 
         function switchView(mode) {
@@ -850,6 +930,111 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             return `<span style="color:var(--text-dim);">${sign}${fr.toFixed(4)}%</span>`;
         }
 
+        /* FILTER SELECTORS */
+        function selectTf(tf) {
+            currentFilterTf = tf;
+            document.querySelectorAll('#pop_tf .cr-preset-btn').forEach(b => {
+                b.classList.toggle('active', b.getAttribute('data-tf') === tf);
+            });
+            document.getElementById('chipTfText').innerText = tf.toUpperCase();
+            closeAllPopovers();
+            updateStats();
+            renderView();
+        }
+
+        function selectCond(cond) {
+            currentFilterCond = cond;
+            document.querySelectorAll('#pop_cond .cr-list-btn').forEach(b => {
+                b.classList.toggle('active', b.getAttribute('data-cond') === cond);
+            });
+            const condLabels = { 'above': '🟢 > Open', 'below': '🔴 < Open', 'all': '⚪ All' };
+            document.getElementById('chipCondText').innerText = condLabels[cond];
+            closeAllPopovers();
+            renderView();
+        }
+
+        function selectFr(fr) {
+            currentFilterFr = fr;
+            document.querySelectorAll('#pop_fr .cr-list-btn').forEach(b => {
+                b.classList.toggle('active', b.getAttribute('data-fr') === fr);
+            });
+            const frBtn = document.getElementById('btnChipFr');
+            const frText = document.getElementById('chipFrText');
+            if (fr === 'all') {
+                frBtn.classList.remove('active-chip');
+                frText.innerText = '⚡ Funding Rate';
+            } else {
+                frBtn.classList.add('active-chip');
+                const labels = { 'neg': '🔥 Neg FR', 'neg_deep': '⚠️ Deep Neg', 'pos': '📈 Pos FR', 'pos_high': '⚡ High Pos' };
+                frText.innerText = `⚡ ${labels[fr]}`;
+            }
+            closeAllPopovers();
+            renderView();
+        }
+
+        function selectVol(vol) {
+            currentFilterVol = vol;
+            document.querySelectorAll('#pop_vol .cr-list-btn').forEach(b => {
+                b.classList.toggle('active', parseFloat(b.getAttribute('data-vol')) === vol);
+            });
+            const volBtn = document.getElementById('btnChipVol');
+            const volText = document.getElementById('chipVolText');
+            if (vol === 0) {
+                volBtn.classList.remove('active-chip');
+                volText.innerText = '📊 24h Volume';
+            } else {
+                volBtn.classList.add('active-chip');
+                volText.innerText = `📊 > ${formatVolume(vol)}`;
+            }
+            closeAllPopovers();
+            renderView();
+        }
+
+        function setMcPreset(minVal, maxVal) {
+            document.getElementById('minMcInput').value = minVal > 0 ? (minVal >= 1e9 ? (minVal/1e9)+'B' : (minVal/1e6)+'M') : '';
+            document.getElementById('maxMcInput').value = maxVal > 0 ? (maxVal >= 1e9 ? (maxVal/1e9)+'B' : (maxVal/1e6)+'M') : '';
+            onMcChange();
+            closeAllPopovers();
+        }
+
+        function onMcChange() {
+            const minMc = parseAmount(document.getElementById('minMcInput').value);
+            const maxMc = parseAmount(document.getElementById('maxMcInput').value);
+            const chipBtn = document.getElementById('btnChipMc');
+            const chipText = document.getElementById('chipMcText');
+
+            if (!minMc && !maxMc) {
+                chipBtn.classList.remove('active-chip');
+                chipText.innerText = '💎 Market Cap';
+            } else {
+                chipBtn.classList.add('active-chip');
+                if (minMc && maxMc) chipText.innerText = `💎 MC: ${formatVolume(minMc)}-${formatVolume(maxMc)}`;
+                else if (minMc) chipText.innerText = `💎 MC: ≥${formatVolume(minMc)}`;
+                else chipText.innerText = `💎 MC: ≤${formatVolume(maxMc)}`;
+            }
+            renderView();
+        }
+
+        function onRangeChange() {
+            let activeCount = 0;
+            ['dev', '1d', '1w', '2w', '1m', '3m', '6m'].forEach(k => {
+                const minEl = document.getElementById(`min_${k}_input`);
+                const maxEl = document.getElementById(`max_${k}_input`);
+                if ((minEl && minEl.value !== '') || (maxEl && maxEl.value !== '')) activeCount++;
+            });
+
+            const chipBtn = document.getElementById('btnChipRanges');
+            const chipText = document.getElementById('chipRangesText');
+            if (activeCount > 0) {
+                chipBtn.classList.add('active-chip');
+                chipText.innerText = `📈 % Ranges (${activeCount})`;
+            } else {
+                chipBtn.classList.remove('active-chip');
+                chipText.innerText = '📈 % Performance';
+            }
+            renderView();
+        }
+
         function resetRangeFilters() {
             ['dev', '1d', '1w', '2w', '1m', '3m', '6m'].forEach(k => {
                 const minEl = document.getElementById(`min_${k}_input`);
@@ -857,58 +1042,88 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 if (minEl) minEl.value = '';
                 if (maxEl) maxEl.value = '';
             });
+            onRangeChange();
+            closeAllPopovers();
+        }
+
+        function resetAllFilters() {
+            selectTf('1w');
+            selectCond('above');
+            selectFr('all');
+            selectVol(0);
+            setMcPreset(0, 0);
+            resetRangeFilters();
+            document.getElementById('searchInput').value = '';
             renderView();
         }
 
-        function updateConfigSummary() {
-            const condLabels = {
-                'above': '> Open',
-                'below': '< Open',
-                'all': 'All'
-            };
-            const label = currentFilterTf.toUpperCase();
-            document.getElementById('activeConfigSummary').innerText = `${label} | ${condLabels[currentFilterCond]}`;
-            
-            document.getElementById('th_open_active').innerText = `Open (${label})`;
-            document.getElementById('th_diff_pct').innerText = `🔥 % Dev. (${label}) ⬍`;
-            const devLabel = document.getElementById('pctDevLabel');
-            if (devLabel) devLabel.innerText = `Dev. (${label}) %`;
-        }
+        /* UPDATE ACTIVE FILTER TAGS (CRYPTORANK STYLE CHIPS BAR) */
+        function updateActiveTags() {
+            const container = document.getElementById('crActiveTags');
+            container.innerHTML = '';
+            const tags = [];
 
-        function selectFilterTf(tf) {
-            currentFilterTf = tf;
-            document.querySelectorAll('#tfGroup .pill-btn').forEach(b => {
-                b.classList.toggle('active', b.getAttribute('data-tf') === tf);
-            });
-            updateConfigSummary();
-            updateStats();
-            renderView();
-        }
+            // Timeframe tag
+            tags.push({ label: `Timeframe: ${currentFilterTf.toUpperCase()}`, onRemove: () => selectTf('1w') });
 
-        function selectFilterCond(cond) {
-            currentFilterCond = cond;
-            document.querySelectorAll('#condGroup .pill-btn').forEach(b => {
-                b.classList.toggle('active', b.getAttribute('data-cond') === cond);
-            });
-            updateConfigSummary();
-            renderView();
-        }
+            // Condition tag
+            if (currentFilterCond !== 'all') {
+                const condLabel = currentFilterCond === 'above' ? 'Position: > Open' : 'Position: < Open';
+                tags.push({ label: condLabel, onRemove: () => selectCond('all') });
+            }
 
-        function setMcPreset(minVal, maxVal) {
-            document.getElementById('minMcInput').value = minVal > 0 ? (minVal >= 1e9 ? (minVal/1e9)+'B' : (minVal/1e6)+'M') : '';
-            document.getElementById('maxMcInput').value = maxVal > 0 ? (maxVal >= 1e9 ? (maxVal/1e9)+'B' : (maxVal/1e6)+'M') : '';
-            onMcInput();
-        }
-
-        function onMcInput() {
+            // Market Cap tag
             const minMc = parseAmount(document.getElementById('minMcInput').value);
             const maxMc = parseAmount(document.getElementById('maxMcInput').value);
-            let label = 'All';
-            if (minMc && maxMc) label = `${formatVolume(minMc)} - ${formatVolume(maxMc)}`;
-            else if (minMc) label = `≥ ${formatVolume(minMc)}`;
-            else if (maxMc) label = `≤ ${formatVolume(maxMc)}`;
-            document.getElementById('mcActiveLabel').innerText = label;
-            renderView();
+            if (minMc || maxMc) {
+                let lbl = 'MCap';
+                if (minMc && maxMc) lbl = `MCap: ${formatVolume(minMc)} - ${formatVolume(maxMc)}`;
+                else if (minMc) lbl = `MCap ≥ ${formatVolume(minMc)}`;
+                else lbl = `MCap ≤ ${formatVolume(maxMc)}`;
+                tags.push({ label: lbl, onRemove: () => setMcPreset(0, 0) });
+            }
+
+            // Funding Rate tag
+            if (currentFilterFr !== 'all') {
+                tags.push({ label: `FR: ${currentFilterFr}`, onRemove: () => selectFr('all') });
+            }
+
+            // Volume tag
+            if (currentFilterVol > 0) {
+                tags.push({ label: `Vol > ${formatVolume(currentFilterVol)}`, onRemove: () => selectVol(0) });
+            }
+
+            // Range tags
+            ['dev', '1d', '1w', '2w', '1m', '3m', '6m'].forEach(k => {
+                const minEl = document.getElementById(`min_${k}_input`);
+                const maxEl = document.getElementById(`max_${k}_input`);
+                const hasMin = minEl && minEl.value !== '';
+                const hasMax = maxEl && maxEl.value !== '';
+                if (hasMin || hasMax) {
+                    let name = k.toUpperCase();
+                    if (k === 'dev') name = `Dev.${currentFilterTf.toUpperCase()}`;
+                    let str = `${name}%: `;
+                    if (hasMin && hasMax) str += `${minEl.value} to ${maxEl.value}`;
+                    else if (hasMin) str += `≥ ${minEl.value}`;
+                    else str += `≤ ${maxEl.value}`;
+                    tags.push({
+                        label: str,
+                        onRemove: () => {
+                            if (minEl) minEl.value = '';
+                            if (maxEl) maxEl.value = '';
+                            onRangeChange();
+                        }
+                    });
+                }
+            });
+
+            tags.forEach(t => {
+                const el = document.createElement('span');
+                el.className = 'cr-tag';
+                el.innerHTML = `<span>${t.label}</span><span class="cr-tag-remove">✕</span>`;
+                el.querySelector('.cr-tag-remove').onclick = t.onRemove;
+                container.appendChild(el);
+            });
         }
 
         function updateStats() {
@@ -940,6 +1155,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             } else {
                 document.getElementById('statAvgDist').innerText = '0.00%';
             }
+
+            document.getElementById('th_open_active').innerText = `Open (${currentFilterTf.toUpperCase()})`;
+            document.getElementById('th_diff_pct').innerText = `🔥 % Dev. (${currentFilterTf.toUpperCase()}) ⬍`;
+            const devLabel = document.getElementById('crDevLabel');
+            if (devLabel) devLabel.innerText = `Dev. (${currentFilterTf.toUpperCase()}) %`;
         }
 
         async function fetchScan(force = false) {
@@ -953,7 +1173,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
                 allTokens = data.tokens;
                 document.getElementById('lastScanTime').innerText = `${data.scan_time} UTC`;
-                updateConfigSummary();
                 updateStats();
                 switchView(currentView);
             } catch (err) {
@@ -977,8 +1196,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         function getFilteredTokens() {
             const search = document.getElementById('searchInput').value.toUpperCase().trim();
-            const minVol = parseFloat(document.getElementById('minVolSelect').value) || 0;
-            const frFilter = document.getElementById('frSelect').value;
             const minMc = parseAmount(document.getElementById('minMcInput').value);
             const maxMc = parseAmount(document.getElementById('maxMcInput').value);
 
@@ -1002,7 +1219,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             let filtered = allTokens.filter(t => {
                 if (currentFilterCond === 'above' && !t[aboveKey]) return false;
                 if (currentFilterCond === 'below' && t[aboveKey]) return false;
-                if (minVol > 0 && t.volume_24h < minVol) return false;
+                if (currentFilterVol > 0 && t.volume_24h < currentFilterVol) return false;
                 if (search && !t.symbol.toUpperCase().includes(search) && !t.base.toUpperCase().includes(search)) return false;
 
                 // MC filter
@@ -1014,10 +1231,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 }
 
                 // FR filter
-                if (frFilter === 'neg' && t.funding_rate >= 0) return false;
-                if (frFilter === 'neg_deep' && t.funding_rate >= -0.05) return false;
-                if (frFilter === 'pos' && t.funding_rate <= 0) return false;
-                if (frFilter === 'pos_high' && t.funding_rate <= 0.03) return false;
+                if (currentFilterFr === 'neg' && t.funding_rate >= 0) return false;
+                if (currentFilterFr === 'neg_deep' && t.funding_rate >= -0.05) return false;
+                if (currentFilterFr === 'pos' && t.funding_rate <= 0) return false;
+                if (currentFilterFr === 'pos_high' && t.funding_rate <= 0.03) return false;
 
                 // Dev % filter
                 const curDev = t[pctKey];
@@ -1057,6 +1274,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         function renderView() {
             const filtered = getFilteredTokens();
             document.getElementById('resultCount').innerText = filtered.length;
+            updateActiveTags();
 
             if (currentView === 'cards') {
                 renderCards(filtered);
@@ -1189,11 +1407,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         }
 
         function exportCSV() {
-            const minVol = document.getElementById('minVolSelect').value || 0;
-            const fr = document.getElementById('frSelect').value || 'all';
             const minMc = parseAmount(document.getElementById('minMcInput').value) || 0;
             const maxMc = parseAmount(document.getElementById('maxMcInput').value) || 0;
-            window.location.href = `/api/export-csv?timeframe=${currentFilterTf}&condition=${currentFilterCond}&min_vol=${minVol}&fr=${fr}&min_mc=${minMc}&max_mc=${maxMc}`;
+            window.location.href = `/api/export-csv?timeframe=${currentFilterTf}&condition=${currentFilterCond}&min_vol=${currentFilterVol}&fr=${currentFilterFr}&min_mc=${minMc}&max_mc=${maxMc}`;
         }
 
         // Auto initial fetch
