@@ -376,6 +376,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .input-box { flex: 1; padding: 6px 9px; border-radius: 6px; border: 1px solid var(--border); background: #19202e; color: #fff; font-size: 13.5px; outline: none; min-height: 34px; }
         .input-box:focus { border-color: var(--yellow); }
 
+        /* PERCENT RANGE FILTERS GRID */
+        .pct-filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 7px; margin-top: 6px; }
+        .pct-filter-item { display: flex; align-items: center; gap: 5px; background: #19202e; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border); }
+        .pct-filter-name { font-size: 11px; font-weight: 700; color: #fff; min-width: 62px; }
+        .pct-input { width: 58px; padding: 4px 6px; font-size: 12.5px; min-height: 28px; text-align: center; }
+
         .action-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); justify-content: space-between; }
         .btn-main { background: var(--yellow); color: #000; font-weight: 700; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 12.5px; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; }
         .btn-main:active { transform: scale(0.98); }
@@ -495,6 +501,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             .header h1 { font-size: 16px; }
             .search-box, .filter-select, .input-box { font-size: 16px !important; }
             .tf-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+            .pct-filter-grid { grid-template-columns: 1fr 1fr; gap: 5px; }
+            .pct-input { width: 44px; font-size: 14px !important; }
         }
     </style>
 </head>
@@ -550,7 +558,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div class="config-grid">
                 <!-- 1. Timeframe -->
                 <div>
-                    <div class="config-section-title">⏱️ 1. Timeframe (UTC)</div>
+                    <div class="config-section-title">⏱️ 1. Focus Timeframe (UTC)</div>
                     <div class="pill-group" id="tfGroup">
                         <button class="pill-btn" data-tf="1d" onclick="selectFilterTf('1d')">1D</button>
                         <button class="pill-btn active" data-tf="1w" onclick="selectFilterTf('1w')">1W</button>
@@ -608,6 +616,65 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                             <option value="5000000">&gt;$5M</option>
                             <option value="20000000">&gt;$20M</option>
                         </select>
+                    </div>
+                </div>
+
+                <!-- 5. Timeframe % & Dev % Ranges -->
+                <div style="grid-column: 1 / -1; border-top: 1px dashed rgba(255,255,255,0.08); padding-top: 10px; margin-top: 2px;">
+                    <div class="config-section-title">
+                        <span>📊 5. Custom % Ranges (Dev from Open & Individual Timeframes)</span>
+                        <button class="pill-btn" style="padding: 2px 8px; font-size: 11px; color: var(--yellow); min-height:24px;" onclick="resetRangeFilters()">↺ Reset %</button>
+                    </div>
+                    <div class="pct-filter-grid">
+                        <!-- Dev from Open of focus TF -->
+                        <div class="pct-filter-item">
+                            <span class="pct-filter-name" id="pctDevLabel">Dev. %</span>
+                            <input type="number" step="any" id="min_dev_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
+                            <span style="color:var(--text-dim); font-size:11px;">-</span>
+                            <input type="number" step="any" id="max_dev_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        </div>
+                        <!-- 1D -->
+                        <div class="pct-filter-item">
+                            <span class="pct-filter-name">1D (24h)</span>
+                            <input type="number" step="any" id="min_1d_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
+                            <span style="color:var(--text-dim); font-size:11px;">-</span>
+                            <input type="number" step="any" id="max_1d_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        </div>
+                        <!-- 1W (7D) -->
+                        <div class="pct-filter-item">
+                            <span class="pct-filter-name">1W (7d)</span>
+                            <input type="number" step="any" id="min_1w_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
+                            <span style="color:var(--text-dim); font-size:11px;">-</span>
+                            <input type="number" step="any" id="max_1w_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        </div>
+                        <!-- 2W (14D) -->
+                        <div class="pct-filter-item">
+                            <span class="pct-filter-name">2W (14d)</span>
+                            <input type="number" step="any" id="min_2w_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
+                            <span style="color:var(--text-dim); font-size:11px;">-</span>
+                            <input type="number" step="any" id="max_2w_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        </div>
+                        <!-- 1M (30D) -->
+                        <div class="pct-filter-item">
+                            <span class="pct-filter-name">1M (30d)</span>
+                            <input type="number" step="any" id="min_1m_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
+                            <span style="color:var(--text-dim); font-size:11px;">-</span>
+                            <input type="number" step="any" id="max_1m_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        </div>
+                        <!-- 3M -->
+                        <div class="pct-filter-item">
+                            <span class="pct-filter-name">3M</span>
+                            <input type="number" step="any" id="min_3m_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
+                            <span style="color:var(--text-dim); font-size:11px;">-</span>
+                            <input type="number" step="any" id="max_3m_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        </div>
+                        <!-- 6M -->
+                        <div class="pct-filter-item">
+                            <span class="pct-filter-name">6M</span>
+                            <input type="number" step="any" id="min_6m_input" class="input-box pct-input" placeholder="Min" oninput="renderView()">
+                            <span style="color:var(--text-dim); font-size:11px;">-</span>
+                            <input type="number" step="any" id="max_6m_input" class="input-box pct-input" placeholder="Max" oninput="renderView()">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -764,6 +831,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             return `<span style="color:var(--text-dim);">${sign}${fr.toFixed(4)}%</span>`;
         }
 
+        function resetRangeFilters() {
+            ['dev', '1d', '1w', '2w', '1m', '3m', '6m'].forEach(k => {
+                const minEl = document.getElementById(`min_${k}_input`);
+                const maxEl = document.getElementById(`max_${k}_input`);
+                if (minEl) minEl.value = '';
+                if (maxEl) maxEl.value = '';
+            });
+            renderView();
+        }
+
         function updateConfigSummary() {
             const condLabels = {
                 'above': '> Open',
@@ -775,6 +852,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             
             document.getElementById('th_open_active').innerText = `Open (${label})`;
             document.getElementById('th_diff_pct').innerText = `🔥 % Dev. (${label}) ⬍`;
+            const devLabel = document.getElementById('pctDevLabel');
+            if (devLabel) devLabel.innerText = `Dev. (${label}) %`;
         }
 
         function selectFilterTf(tf) {
@@ -887,12 +966,27 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const aboveKey = `above_${currentFilterTf}`;
             const pctKey = `pct_${currentFilterTf}`;
 
+            // Range % filters
+            const minDev = parseFloat(document.getElementById('min_dev_input').value);
+            const maxDev = parseFloat(document.getElementById('max_dev_input').value);
+
+            const tfRangeFilters = {};
+            ['1d', '1w', '2w', '1m', '3m', '6m'].forEach(tf => {
+                const minEl = document.getElementById(`min_${tf}_input`);
+                const maxEl = document.getElementById(`max_${tf}_input`);
+                tfRangeFilters[tf] = {
+                    min: minEl && minEl.value !== '' ? parseFloat(minEl.value) : NaN,
+                    max: maxEl && maxEl.value !== '' ? parseFloat(maxEl.value) : NaN
+                };
+            });
+
             let filtered = allTokens.filter(t => {
                 if (currentFilterCond === 'above' && !t[aboveKey]) return false;
                 if (currentFilterCond === 'below' && t[aboveKey]) return false;
                 if (minVol > 0 && t.volume_24h < minVol) return false;
                 if (search && !t.symbol.toUpperCase().includes(search) && !t.base.toUpperCase().includes(search)) return false;
 
+                // MC filter
                 if (minMc !== null && minMc > 0) {
                     if (!t.market_cap || t.market_cap < minMc) return false;
                 }
@@ -900,10 +994,24 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     if (!t.market_cap || t.market_cap > maxMc) return false;
                 }
 
+                // FR filter
                 if (frFilter === 'neg' && t.funding_rate >= 0) return false;
                 if (frFilter === 'neg_deep' && t.funding_rate >= -0.05) return false;
                 if (frFilter === 'pos' && t.funding_rate <= 0) return false;
                 if (frFilter === 'pos_high' && t.funding_rate <= 0.03) return false;
+
+                // Dev % filter
+                const curDev = t[pctKey];
+                if (!isNaN(minDev) && curDev < minDev) return false;
+                if (!isNaN(maxDev) && curDev > maxDev) return false;
+
+                // Individual timeframe % filters (1D, 1W, 2W, 1M, 3M, 6M)
+                for (const tf of ['1d', '1w', '2w', '1m', '3m', '6m']) {
+                    const range = tfRangeFilters[tf];
+                    const val = t[`pct_${tf}`];
+                    if (!isNaN(range.min) && val < range.min) return false;
+                    if (!isNaN(range.max) && val > range.max) return false;
+                }
 
                 return true;
             });
