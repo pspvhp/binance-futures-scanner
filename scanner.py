@@ -460,7 +460,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .cr-reset-all { background: transparent; border: 1px dashed var(--border); color: var(--text-dim); padding: 7px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; margin-left: auto; }
         .cr-reset-all:hover { color: var(--yellow); border-color: var(--yellow); }
 
-        /* ACTIVE FILTER TAGS ROW (CRYPTORANK SIGNATURE) */
+        /* ACTIVE FILTER TAGS ROW */
         .cr-active-tags-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); min-height: 28px; }
         .cr-tag { background: #1e2638; border: 1px solid #32405d; color: #cbd5e1; border-radius: 14px; padding: 2px 8px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
         .cr-tag-remove { cursor: pointer; color: var(--text-dim); font-size: 12px; line-height: 1; }
@@ -478,6 +478,35 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         .btn-export { background: #18202d; border: 1px solid var(--border); color: var(--text); padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
         .btn-export:hover { background: #232c40; color: #fff; }
+
+        /* TOKEN INFO (i) BADGE */
+        .info-btn {
+            background: #1e2638;
+            color: #60a5fa;
+            border: 1px solid #2d3d5c;
+            border-radius: 50%;
+            width: 17px;
+            height: 17px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            font-style: italic;
+            cursor: pointer;
+            margin-left: 4px;
+            transition: all 0.15s;
+            user-select: none;
+            vertical-align: middle;
+            padding: 0;
+            line-height: 1;
+        }
+        .info-btn:hover {
+            background: #2563eb;
+            color: #fff;
+            border-color: #3b82f6;
+            transform: scale(1.15);
+        }
 
         /* BADGES */
         .pill-tag { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
@@ -502,7 +531,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .crypto-card:hover { border-color: #3b4b66; background: var(--surface-hover); }
         
         .card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
-        .card-sym-title { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 5px; }
+        .card-sym-title { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 4px; }
         .card-price-display { font-size: 15px; font-weight: 700; color: #fff; }
 
         .card-focus-bar {
@@ -549,6 +578,110 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         th.col-sticky-1, td.col-sticky-1 { position: sticky; left: 0; z-index: 3; background: #121721; width: 30px; text-align: center; }
         th.col-sticky-2, td.col-sticky-2 { position: sticky; left: 30px; z-index: 3; background: #121721; box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
         th.col-sticky-1, th.col-sticky-2 { background: #161c27; z-index: 4; }
+
+        /* TOKEN QUICK INFO MODAL POPUP */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-card {
+            background: #141a24;
+            border: 1px solid #2d384e;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.75);
+            overflow: hidden;
+            animation: modalFade 0.18s ease-out;
+        }
+        @keyframes modalFade { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            background: #10151f;
+        }
+        .modal-title-group { display: flex; align-items: center; gap: 8px; }
+        .modal-symbol { font-size: 18px; font-weight: 700; color: #fff; }
+        .modal-close {
+            background: #1e2638;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .modal-close:hover { color: #fff; background: #2b364e; }
+
+        .modal-body { padding: 14px 16px; max-height: 80vh; overflow-y: auto; }
+        
+        .modal-stats-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .modal-stat-box {
+            background: #18202d;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 12px;
+        }
+        .modal-stat-label { font-size: 11px; color: var(--text-dim); margin-bottom: 2px; }
+        .modal-stat-val { font-size: 15px; font-weight: 700; color: #fff; }
+
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-bottom: 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .modal-table th { background: #18202d; padding: 7px 10px; color: var(--text-dim); font-size: 11px; font-weight: 600; text-align: left; }
+        .modal-table td { padding: 8px 10px; border-top: 1px solid var(--border); }
+
+        .modal-links-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .modal-link-btn {
+            flex: 1;
+            min-width: 100px;
+            text-align: center;
+            background: #18202d;
+            border: 1px solid var(--border);
+            color: #93c5fd;
+            text-decoration: none;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .modal-link-btn:hover { background: #2563eb; color: #fff; border-color: #2563eb; }
 
         /* FAB */
         .fab-rescan {
@@ -839,6 +972,66 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         </table>
     </div>
 
+    <!-- TOKEN QUICK INFO MODAL OVERLAY -->
+    <div class="modal-overlay" id="tokenModalOverlay" onclick="closeTokenModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span class="modal-symbol" id="mSymbol">BTC</span>
+                    <span style="font-size:12px; color:var(--text-dim);">USDT-M Perpetual</span>
+                    <span id="mTrendBadge"></span>
+                </div>
+                <button class="modal-close" onclick="closeTokenModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-stats-row">
+                    <div class="modal-stat-box">
+                        <div class="modal-stat-label">Current Price</div>
+                        <div class="modal-stat-val" id="mPrice">$0.00</div>
+                    </div>
+                    <div class="modal-stat-box">
+                        <div class="modal-stat-label">Market Cap</div>
+                        <div class="modal-stat-val" id="mCap" style="color:#b388ff;">-</div>
+                    </div>
+                    <div class="modal-stat-box">
+                        <div class="modal-stat-label">24h Volume</div>
+                        <div class="modal-stat-val" id="mVol">$0</div>
+                    </div>
+                    <div class="modal-stat-box">
+                        <div class="modal-stat-label">Funding Rate</div>
+                        <div class="modal-stat-val" id="mFr">-</div>
+                    </div>
+                </div>
+
+                <div style="font-size:11.5px; font-weight:700; color:var(--text-dim); text-transform:uppercase; margin-bottom:6px;">
+                    Multi-Timeframe UTC 00:00 Open Benchmarks
+                </div>
+                <table class="modal-table">
+                    <thead>
+                        <tr>
+                            <th>Timeframe</th>
+                            <th>Open Price</th>
+                            <th>Deviation (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mTableBody"></tbody>
+                </table>
+
+                <div class="modal-links-row">
+                    <a id="mLinkBinance" href="#" target="_blank" class="modal-link-btn">
+                        <span>📊 Binance Chart</span> ↗
+                    </a>
+                    <a id="mLinkTv" href="#" target="_blank" class="modal-link-btn">
+                        <span>📈 TradingView</span> ↗
+                    </a>
+                    <a id="mLinkCmc" href="#" target="_blank" class="modal-link-btn">
+                        <span>💎 CoinMarketCap</span> ↗
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- FAB RESCAN -->
     <button class="fab-rescan" onclick="fetchScan(true)">
         🔄 <span>Rescan</span>
@@ -863,6 +1056,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             }
         });
 
+        // ESC key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeTokenModal();
+                closeAllPopovers();
+            }
+        });
+
         function closeAllPopovers() {
             document.querySelectorAll('.cr-popover').forEach(p => p.classList.remove('show'));
             document.querySelectorAll('.cr-chip').forEach(c => c.classList.remove('open'));
@@ -876,6 +1077,62 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 el.classList.add('show');
                 el.parentElement.querySelector('.cr-chip').classList.add('open');
             }
+        }
+
+        /* TOKEN QUICK INFO MODAL POPUP */
+        function openTokenModal(sym) {
+            const t = allTokens.find(x => x.symbol === sym);
+            if (!t) return;
+
+            document.getElementById('mSymbol').innerText = t.base;
+            document.getElementById('mPrice').innerText = '$' + formatNumber(t.current_price);
+            document.getElementById('mCap').innerHTML = formatMarketCap(t.market_cap);
+            document.getElementById('mVol').innerText = formatVolume(t.volume_24h);
+            document.getElementById('mFr').innerHTML = getFundingBadge(t.funding_rate);
+
+            let trendHtml = '';
+            if (t.green_count >= 5) trendHtml = `<span class="pill-tag green">🟢 Bullish (${t.green_count}/6)</span>`;
+            else if (t.green_count >= 3) trendHtml = `<span class="pill-tag yellow">🟡 Neutral (${t.green_count}/6)</span>`;
+            else trendHtml = `<span class="pill-tag red">🔴 Bearish (${t.green_count}/6)</span>`;
+            document.getElementById('mTrendBadge').innerHTML = trendHtml;
+
+            const tfs = [
+                { key: '1d', label: '1D (Today)' },
+                { key: '1w', label: '1W (Weekly)' },
+                { key: '2w', label: '2W (Bi-weekly)' },
+                { key: '1m', label: '1M (Monthly)' },
+                { key: '3m', label: '3M (Quarter)' },
+                { key: '6m', label: '6M (Semi-annual)' }
+            ];
+
+            const tbody = document.getElementById('mTableBody');
+            tbody.innerHTML = '';
+            tfs.forEach(item => {
+                const openVal = t[`open_${item.key}`];
+                const pct = t[`pct_${item.key}`];
+                const isGreen = pct >= 0;
+                const sign = isGreen ? '▲ +' : '▼ ';
+                const cls = isGreen ? 'text-green' : 'text-red';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="font-weight:600; color:#fff;">${item.label}</td>
+                    <td style="color:var(--text-dim);">$${formatNumber(openVal)}</td>
+                    <td class="${cls}" style="font-weight:700;">${sign}${Math.abs(pct).toFixed(2)}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Links
+            document.getElementById('mLinkBinance').href = `https://www.binance.com/en/futures/${t.symbol}`;
+            document.getElementById('mLinkTv').href = `https://www.tradingview.com/chart/?symbol=BINANCE:${t.symbol}.P`;
+            document.getElementById('mLinkCmc').href = `https://coinmarketcap.com/currencies/${t.base.toLowerCase()}/`;
+
+            document.getElementById('tokenModalOverlay').classList.add('show');
+        }
+
+        function closeTokenModal(e) {
+            if (e && e.target && e.target.closest('.modal-card')) return;
+            document.getElementById('tokenModalOverlay').classList.remove('show');
         }
 
         function switchView(mode) {
@@ -1057,22 +1314,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             renderView();
         }
 
-        /* UPDATE ACTIVE FILTER TAGS (CRYPTORANK STYLE CHIPS BAR) */
+        /* UPDATE ACTIVE FILTER TAGS */
         function updateActiveTags() {
             const container = document.getElementById('crActiveTags');
             container.innerHTML = '';
             const tags = [];
 
-            // Timeframe tag
             tags.push({ label: `Timeframe: ${currentFilterTf.toUpperCase()}`, onRemove: () => selectTf('1w') });
 
-            // Condition tag
             if (currentFilterCond !== 'all') {
                 const condLabel = currentFilterCond === 'above' ? 'Position: > Open' : 'Position: < Open';
                 tags.push({ label: condLabel, onRemove: () => selectCond('all') });
             }
 
-            // Market Cap tag
             const minMc = parseAmount(document.getElementById('minMcInput').value);
             const maxMc = parseAmount(document.getElementById('maxMcInput').value);
             if (minMc || maxMc) {
@@ -1083,17 +1337,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 tags.push({ label: lbl, onRemove: () => setMcPreset(0, 0) });
             }
 
-            // Funding Rate tag
             if (currentFilterFr !== 'all') {
                 tags.push({ label: `FR: ${currentFilterFr}`, onRemove: () => selectFr('all') });
             }
 
-            // Volume tag
             if (currentFilterVol > 0) {
                 tags.push({ label: `Vol > ${formatVolume(currentFilterVol)}`, onRemove: () => selectVol(0) });
             }
 
-            // Range tags
             ['dev', '1d', '1w', '2w', '1m', '3m', '6m'].forEach(k => {
                 const minEl = document.getElementById(`min_${k}_input`);
                 const maxEl = document.getElementById(`max_${k}_input`);
@@ -1202,7 +1453,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const aboveKey = `above_${currentFilterTf}`;
             const pctKey = `pct_${currentFilterTf}`;
 
-            // Range % filters
             const minDev = parseFloat(document.getElementById('min_dev_input').value);
             const maxDev = parseFloat(document.getElementById('max_dev_input').value);
 
@@ -1222,7 +1472,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 if (currentFilterVol > 0 && t.volume_24h < currentFilterVol) return false;
                 if (search && !t.symbol.toUpperCase().includes(search) && !t.base.toUpperCase().includes(search)) return false;
 
-                // MC filter
                 if (minMc !== null && minMc > 0) {
                     if (!t.market_cap || t.market_cap < minMc) return false;
                 }
@@ -1230,18 +1479,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     if (!t.market_cap || t.market_cap > maxMc) return false;
                 }
 
-                // FR filter
                 if (currentFilterFr === 'neg' && t.funding_rate >= 0) return false;
                 if (currentFilterFr === 'neg_deep' && t.funding_rate >= -0.05) return false;
                 if (currentFilterFr === 'pos' && t.funding_rate <= 0) return false;
                 if (currentFilterFr === 'pos_high' && t.funding_rate <= 0.03) return false;
 
-                // Dev % filter
                 const curDev = t[pctKey];
                 if (!isNaN(minDev) && curDev < minDev) return false;
                 if (!isNaN(maxDev) && curDev > maxDev) return false;
 
-                // Individual timeframe % filters (1D, 1W, 2W, 1M, 3M, 6M)
                 for (const tf of ['1d', '1w', '2w', '1m', '3m', '6m']) {
                     const range = tfRangeFilters[tf];
                     const val = t[`pct_${tf}`];
@@ -1321,6 +1567,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                             <span style="color:var(--text-dim); font-size:11px;">#${index + 1}</span>
                             <span>${t.base}</span>
                             <span class="symbol-sub">USDT</span>
+                            <button class="info-btn" onclick="openTokenModal('${t.symbol}')" title="Quick Info">i</button>
                             ${strengthBadge}
                         </div>
                         <div class="card-price-display">$${formatNumber(t.current_price)}</div>
@@ -1383,6 +1630,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     <td class="col-sticky-2">
                         <span class="symbol-cell">${t.base}</span>
                         <span class="symbol-sub">USDT</span>
+                        <button class="info-btn" onclick="openTokenModal('${t.symbol}')" title="Quick Info">i</button>
                     </td>
                     <td style="font-weight:600;">$${formatNumber(t.current_price)}</td>
                     <td>${getFundingBadge(t.funding_rate)}</td>
