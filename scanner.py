@@ -161,6 +161,96 @@ def fetch_symbol_international(symbol):
     except Exception as e:
         return symbol, 0, {}, str(e)
 
+
+TOKEN_NARRATIVES = {
+    'BTC': ('Layer 1 · Digital Gold', 'Original cryptocurrency, store of value benchmark and PoW Layer 1 network.'),
+    'ETH': ('Layer 1 · Smart Contracts', 'Dominant smart contract platform powering DeFi, NFTs & Layer 2 rollups.'),
+    'SOL': ('Layer 1 · High Speed', 'Ultra-fast PoH/PoS Layer 1 blockchain with a massive DeFi, NFT & Meme ecosystem.'),
+    'BNB': ('Layer 1 · BNB Chain', 'Core utility and gas token powering the BNB Chain and Binance ecosystem.'),
+    'SUI': ('Layer 1 · Move VM', 'Next-gen high-throughput Layer 1 using object-centric Move for sub-second finality.'),
+    'APT': ('Layer 1 · Move VM', 'Scalable Layer 1 blockchain built by former Diem/Meta engineers using Move language.'),
+    'SEI': ('Layer 1 · Parallelized EVM', 'Fastest parallelized EVM Layer 1 optimized specifically for decentralized trading.'),
+    'NEAR': ('Layer 1 · AI & Sharding', 'Nightshade-sharded Layer 1 pioneer focusing on User-Owned AI and chain abstraction.'),
+    'AVAX': ('Layer 1 · Avalanche Subnets', 'High-speed EVM-compatible Layer 1 using Avalanche consensus and customizable Subnets.'),
+    'ADA': ('Layer 1 · Cardano PoS', 'Peer-reviewed proof-of-stake Layer 1 blockchain founded by Charles Hoskinson.'),
+    'TON': ('Layer 1 · Telegram Web3', 'The Open Network Layer 1 deeply integrated into Telegram for 900M+ users.'),
+    'TRX': ('Layer 1 · TRON Network', 'High-throughput Layer 1 network widely used for global USDT-TRC20 payments.'),
+    'XRP': ('Layer 1 · Ripple Payments', 'Fast enterprise payments and cross-border settlement token by Ripple.'),
+    'ATOM': ('Layer 0/1 · Cosmos Hub', 'Interoperability hub connecting an interconnected network of Cosmos appchains.'),
+    'INJ': ('Layer 1 · Injective Finance', 'DeFi-focused Layer 1 featuring on-chain orderbooks, fast swaps, and derivatives.'),
+    'KAS': ('Layer 1 · GHOSTDAG PoW', 'Proof-of-Work cryptocurrency implementing the GHOSTDAG blockDAG protocol for high TPS.'),
+    'FTM': ('Layer 1 · Sonic / Fantom', 'High-throughput DAG-based Layer 1 transitioning to Sonic EVM with 10,000+ TPS.'),
+    'DOT': ('Layer 0 · Polkadot Relay', 'Shared multichain network connecting specialized sovereign parachains.'),
+    'TRUMP': ('Meme Coin · PolitiFi', 'Prominent US political meme token themed around Donald Trump.'),
+    'MAGA': ('Meme Coin · PolitiFi', 'Political finance meme token themed around the Make America Great Again movement.'),
+    'PEPE': ('Meme Coin · Frog Meme', 'Massive Ethereum meme coin paying homage to the iconic Pepe the Frog meme.'),
+    'DOGE': ('Meme Coin · Original Doge', 'The original dog meme cryptocurrency created in 2013, supported by Elon Musk.'),
+    'SHIB': ('Meme Coin · Shiba Inu', 'Decentralized meme ecosystem featuring ShibaSwap DEX and Shibarium L2.'),
+    'WIF': ('Meme Coin · Dogwifhat', 'Viral Solana meme token featuring an adorable Shiba puppy wearing a pink beanie.'),
+    'BONK': ('Meme Coin · Solana Dog', 'First dog community coin on Solana, deeply integrated across Solana DeFi and gaming.'),
+    'FLOKI': ('Meme Coin · Floki Vikings', 'Viking-themed meme token expanding into Valhalla metaverse gaming and DeFi.'),
+    'BOME': ('Meme Coin · Book of Meme', 'Experimental meme project storing decentralized meme culture on Arweave and IPFS.'),
+    'NEIRO': ('Meme Coin · First Neiro', 'Community-driven meme token themed around the newly adopted sister of original Doge.'),
+    'PNUT': ('Meme Coin · Squirrel Meme', 'Viral Solana meme token inspired by the widely publicized Peanut the Squirrel story.'),
+    'GOAT': ('AI Meme · AI Agent', 'First viral AI-generated meme coin spawned autonomously by Truth Terminal LLM on Solana.'),
+    'ACT': ('AI Meme · AI Agent', 'AI Agent and decentralized intelligence meme token on Solana listed on Binance.'),
+    'TURBO': ('AI Meme · GPT-4 Meme', 'First community cryptocurrency conceptualized, coded and deployed entirely by GPT-4.'),
+    'RENDER': ('DePIN · AI GPU Compute', 'Decentralized GPU rendering and AI compute cloud connecting 3D artists with node operators.'),
+    'FET': ('AI & Big Data · ASI Alliance', 'Autonomous software agents for multi-stakeholder systems; cornerstone of ASI Alliance.'),
+    'TAO': ('DeAI · Bittensor Machine Learning', 'Decentralized neural network protocol incentivizing global collaborative machine intelligence.'),
+    'WLD': ('AI · Worldcoin Identity', 'World Network privacy-preserving global digital identity and financial network (Sam Altman).'),
+    'IO': ('DePIN · GPU Cloud for AI', 'Decentralized GPU computing network aggregating underutilized compute clusters for AI.'),
+    'GRT': ('AI & Data · The Graph Indexing', 'Decentralized indexing and querying protocol for blockchain data, the Google of Web3.'),
+    'ARKM': ('AI · On-chain Intelligence', 'AI-powered blockchain analysis and deanonymization intelligence platform.'),
+    'ONDO': ('RWA · US Treasuries', 'Leading Real World Asset tokenization platform offering tokenized US Treasuries yield.'),
+    'OM': ('RWA · MANTRA Chain', 'MANTRA Chain Layer 1 built specifically for compliant Real World Asset tokenization.'),
+    'PENDLE': ('RWA & DeFi · Yield Trading', 'Yield tokenization protocol allowing users to trade future crypto yields and point systems.'),
+    'UNI': ('DeFi · Uniswap DEX', 'Dominant decentralized crypto automated market maker enabling peer-to-peer token swaps.'),
+    'AAVE': ('DeFi · Lending Protocol', 'Leading decentralized non-custodial liquidity protocol to earn interest and borrow assets.'),
+    'CRV': ('DeFi · Curve Stablecoin DEX', 'Decentralized exchange optimized for ultra-low slippage stablecoin and pegged token trading.'),
+    'MKR': ('DeFi · MakerDAO Stablecoin', 'Governance token of Sky (MakerDAO), the decentralized issuer of the USDS / DAI stablecoin.'),
+    'LDO': ('DeFi · Lido Liquid Staking', 'Leading liquid staking protocol for Ethereum, issuing stETH backed by staked ETH.'),
+    'ENA': ('DeFi · Ethena USDe Dollar', 'Synthetic dollar protocol creating the delta-hedged yield-bearing USDe stable asset.'),
+    'RAY': ('DeFi · Raydium Solana DEX', 'Primary on-chain automated market maker and liquidity provider on Solana.'),
+    'JUP': ('DeFi · Jupiter Solana DEX', 'Leading DEX aggregator and trading platform on Solana routing optimal trade execution.'),
+    'ARB': ('Layer 2 · Arbitrum Rollup', 'Top Ethereum Layer 2 scaling network using optimistic rollups for low transaction fees.'),
+    'OP': ('Layer 2 · Optimism Superchain', 'Ethereum L2 scaling network and creator of the open-source OP Stack Superchain ecosystem.'),
+    'STRK': ('Layer 2 · Starknet ZK', 'Permissionless validity rollup Layer 2 using STARK cryptographic proofs for Ethereum scaling.'),
+    'ZK': ('Layer 2 · ZKsync Era', 'ZK-rollup Layer 2 with native account abstraction and hyperchain architecture.'),
+    'POL': ('Layer 2 · Polygon Network', 'Ethereum Layer 2 and multi-chain PoS scaling platform transitioning to AggLayer.'),
+    'MANTA': ('Layer 2 · Modular ZK', 'Multi-modular ecosystem for zero-knowledge applications powered by Celestia DA.'),
+    'METIS': ('Layer 2 · Decentralized Sequencer', 'Ethereum Layer 2 network pioneering the first decentralized sequencer architecture.'),
+    'TIA': ('Modular · Celestia Data Availability', 'First modular blockchain network that specializes exclusively in scalable data availability.'),
+    'DYM': ('Modular · Dymension RollApps', 'Modular settlement hub coordinating sovereign RollApps with IBC interoperability.'),
+    'LINK': ('Oracle · Chainlink Network', 'Industry-standard decentralized Web3 services platform providing real-world data and oracles.'),
+    'PYTH': ('Oracle · Pyth Network', 'High-frequency financial oracle delivering sub-second real-time market data across 50+ chains.'),
+    'HNT': ('DePIN · Helium Wireless', 'Decentralized wireless infrastructure network incentivizing physical hotspot deployments.'),
+    'FIL': ('DePIN · Filecoin Storage', 'Decentralized peer-to-peer storage network allowing users to rent unused hard drive space.'),
+    'AR': ('DePIN · Arweave Permaweb', 'Permanent, immutable decentralized storage network preserving humanity’s data indefinitely.'),
+    'GALA': ('Gaming · Gala Games', 'Decentralized Web3 entertainment and gaming ecosystem with player-owned assets.'),
+    'SAND': ('Gaming · The Sandbox Metaverse', 'Virtual metaverse world where players can build, own, and monetize gaming experiences.'),
+    'AXS': ('Gaming · Axie Infinity', 'Pioneering play-and-earn Web3 gaming universe developed by Sky Mavis on Ronin.'),
+    'PIXEL': ('Gaming · Pixels Universe', 'Open-ended social Web3 farming and exploration game on the Ronin blockchain.')
+}
+
+def get_token_narrative(base, clean_base):
+    for key in [base, clean_base]:
+        if key in TOKEN_NARRATIVES:
+            return TOKEN_NARRATIVES[key]
+    
+    # Smart heuristics
+    c_upper = clean_base.upper()
+    if any(m in c_upper for m in ['DOGE', 'CAT', 'PUP', 'INU', 'MEME', 'SHIB', 'PEPE', 'MOON', 'TRUMP', 'ELON', 'PIG', 'WIF', 'RAT']):
+        return ('Meme Coin', f'{base} is a popular community-driven meme coin listed on Binance Futures.')
+    if any(m in c_upper for m in ['AI', 'GPT', 'AGENT', 'BOT', 'NEURAL']):
+        return ('AI & Big Data', f'{base} is an Artificial Intelligence / Machine Learning decentralized project.')
+    if any(m in c_upper for m in ['SWAP', 'DEX', 'FINANCE', 'YIELD', 'LEND', 'BANK']):
+        return ('DeFi Protocol', f'{base} is a Decentralized Finance protocol listed on Binance Futures.')
+    if any(m in c_upper for m in ['GAME', 'PLAY', 'META', 'VERSE']):
+        return ('Gaming / Metaverse', f'{base} is a Web3 gaming and metaverse ecosystem token.')
+    
+    return ('Crypto Asset', f'{base} USDT-Margined perpetual contract traded on Binance Futures.')
+
 def run_scan():
     global IS_SCANNING, CACHE_DATA, LAST_SCAN_TIME
     IS_SCANNING = True
@@ -198,7 +288,10 @@ def run_scan():
 
                 green_count = sum(1 for tf in ['1d', '1w', '2w', '1m', '3m', '6m'] if tf_data[tf]['pct'] > 0)
 
+                cat_tag, cat_desc = get_token_narrative(base, clean_base)
                 results.append({
+                    'category': cat_tag,
+                    'summary': cat_desc,
                     'symbol': sym,
                     'base': base,
                     'current_price': latest_price,
@@ -508,6 +601,27 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             transform: scale(1.15);
         }
 
+        /* FLOATING HOVER / HOLD AI SUMMARY TOOLTIP */
+        .cr-info-tooltip {
+            position: fixed;
+            z-index: 99999;
+            display: none;
+            width: 290px;
+            background: #141a24;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 11px 13px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.85);
+            pointer-events: none;
+            animation: ttFade 0.15s ease-out;
+        }
+        @keyframes ttFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .tt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .tt-sym { font-size: 15px; font-weight: 700; color: #fff; }
+        .tt-tag { background: rgba(37, 99, 235, 0.18); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); padding: 2px 7px; border-radius: 4px; font-size: 10.5px; font-weight: 700; }
+        .tt-desc { font-size: 12px; color: #cbd5e1; line-height: 1.45; margin-bottom: 8px; }
+        .tt-footer { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px; }
+
         /* BADGES */
         .pill-tag { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
         .pill-tag.green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(14, 203, 129, 0.3); }
@@ -579,7 +693,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         th.col-sticky-2, td.col-sticky-2 { position: sticky; left: 30px; z-index: 3; background: #121721; box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
         th.col-sticky-1, th.col-sticky-2 { background: #161c27; z-index: 4; }
 
-        /* TOKEN QUICK INFO MODAL POPUP */
+        /* TOKEN QUICK INFO MODAL OVERLAY */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -717,6 +831,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             .search-box, .cr-input { font-size: 16px !important; }
             .tf-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
             .cr-popover { position: fixed; top: auto; bottom: 0; left: 0; right: 0; width: 100%; border-radius: 16px 16px 0 0; border: 1px solid #334155; padding: 16px; z-index: 10000; max-height: 80vh; overflow-y: auto; }
+            .cr-info-tooltip { width: 260px; }
         }
     </style>
 </head>
@@ -972,6 +1087,20 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         </table>
     </div>
 
+    <!-- FLOATING HOVER / HOLD AI SUMMARY TOOLTIP -->
+    <div id="infoTooltipFloating" class="cr-info-tooltip">
+        <div class="tt-header">
+            <span class="tt-sym" id="ttSymbol">BTC</span>
+            <span class="tt-tag" id="ttCategory">Layer 1</span>
+        </div>
+        <div class="tt-desc" id="ttDesc">Original cryptocurrency, digital gold and benchmark PoW Layer 1 network.</div>
+        <div class="tt-footer">
+            <span id="ttPrice" style="font-weight:700; color:#fff;">$0.00</span>
+            <span id="ttCap" style="color:#b388ff;">-</span>
+            <span id="ttFr">-</span>
+        </div>
+    </div>
+
     <!-- TOKEN QUICK INFO MODAL OVERLAY -->
     <div class="modal-overlay" id="tokenModalOverlay" onclick="closeTokenModal(event)">
         <div class="modal-card" onclick="event.stopPropagation()">
@@ -1048,6 +1177,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         let allTokens = [];
         let currentSort = { col: 'diff_pct', dir: 'desc' };
         let currentView = isMobile ? 'cards' : 'table';
+        let tooltipHideTimer = null;
 
         // Close popovers on click outside
         document.addEventListener('click', (e) => {
@@ -1063,6 +1193,41 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 closeAllPopovers();
             }
         });
+
+        /* FLOATING HOVER / HOLD AI SUMMARY TOOLTIP */
+        function showInfoTooltip(e, sym) {
+            if (tooltipHideTimer) clearTimeout(tooltipHideTimer);
+            const t = allTokens.find(x => x.symbol === sym);
+            if (!t) return;
+
+            const el = document.getElementById('infoTooltipFloating');
+            document.getElementById('ttSymbol').innerText = t.base;
+            document.getElementById('ttCategory').innerText = t.category || 'Crypto Asset';
+            document.getElementById('ttDesc').innerText = t.summary || `${t.base} is a token traded on Binance Futures.`;
+            document.getElementById('ttPrice').innerText = '$' + formatNumber(t.current_price);
+            document.getElementById('ttCap').innerHTML = 'MC: ' + formatMarketCap(t.market_cap);
+            document.getElementById('ttFr').innerHTML = 'FR: ' + getFundingBadge(t.funding_rate);
+
+            el.style.display = 'block';
+
+            const rect = e.currentTarget.getBoundingClientRect();
+            let left = rect.left + rect.width / 2 - 145;
+            let top = rect.top - el.offsetHeight - 8;
+
+            if (left < 10) left = 10;
+            if (left + 300 > window.innerWidth) left = window.innerWidth - 305;
+            if (top < 10) top = rect.bottom + 8; // flip below if crowded above
+
+            el.style.left = left + 'px';
+            el.style.top = top + 'px';
+        }
+
+        function hideInfoTooltip() {
+            tooltipHideTimer = setTimeout(() => {
+                const el = document.getElementById('infoTooltipFloating');
+                if (el) el.style.display = 'none';
+            }, 60);
+        }
 
         function closeAllPopovers() {
             document.querySelectorAll('.cr-popover').forEach(p => p.classList.remove('show'));
@@ -1081,6 +1246,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         /* TOKEN QUICK INFO MODAL POPUP */
         function openTokenModal(sym) {
+            hideInfoTooltip();
             const t = allTokens.find(x => x.symbol === sym);
             if (!t) return;
 
@@ -1122,7 +1288,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 tbody.appendChild(row);
             });
 
-            // Links
             document.getElementById('mLinkBinance').href = `https://www.binance.com/en/futures/${t.symbol}`;
             document.getElementById('mLinkTv').href = `https://www.tradingview.com/chart/?symbol=BINANCE:${t.symbol}.P`;
             document.getElementById('mLinkCmc').href = `https://coinmarketcap.com/currencies/${t.base.toLowerCase()}/`;
@@ -1567,7 +1732,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                             <span style="color:var(--text-dim); font-size:11px;">#${index + 1}</span>
                             <span>${t.base}</span>
                             <span class="symbol-sub">USDT</span>
-                            <button class="info-btn" onclick="openTokenModal('${t.symbol}')" title="Quick Info">i</button>
+                            <button class="info-btn"
+                                    onmouseenter="showInfoTooltip(event, '${t.symbol}')"
+                                    onmouseleave="hideInfoTooltip()"
+                                    ontouchstart="showInfoTooltip(event, '${t.symbol}')"
+                                    ontouchend="hideInfoTooltip()"
+                                    onclick="openTokenModal('${t.symbol}')">i</button>
                             ${strengthBadge}
                         </div>
                         <div class="card-price-display">$${formatNumber(t.current_price)}</div>
@@ -1630,7 +1800,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     <td class="col-sticky-2">
                         <span class="symbol-cell">${t.base}</span>
                         <span class="symbol-sub">USDT</span>
-                        <button class="info-btn" onclick="openTokenModal('${t.symbol}')" title="Quick Info">i</button>
+                        <button class="info-btn"
+                                onmouseenter="showInfoTooltip(event, '${t.symbol}')"
+                                onmouseleave="hideInfoTooltip()"
+                                ontouchstart="showInfoTooltip(event, '${t.symbol}')"
+                                ontouchend="hideInfoTooltip()"
+                                onclick="openTokenModal('${t.symbol}')">i</button>
                     </td>
                     <td style="font-weight:600;">$${formatNumber(t.current_price)}</td>
                     <td>${getFundingBadge(t.funding_rate)}</td>
