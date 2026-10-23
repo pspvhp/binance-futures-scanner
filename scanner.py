@@ -298,11 +298,11 @@ def export_to_csv(data, filter_tf='1w', filter_cond='all', min_vol=0, dist_filte
 
 # ----------------- MODERN MULTI-TIMEFRAME WEB DASHBOARD -----------------
 HTML_TEMPLATE = """<!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Binance Futures Scanner | Mobile & Desktop</title>
+    <title>Binance Futures Scanner</title>
     <style>
         :root {
             --bg: #0b0e14;
@@ -323,46 +323,45 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             --orange-bg: rgba(255, 152, 0, 0.15);
             --blue: #2962ff;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); padding: 16px 14px 90px 14px; min-height: 100vh; font-size: 13.5px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); padding: 14px 14px 90px 14px; min-height: 100vh; font-size: 13px; }
         
         /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-        .title-group h1 { font-size: 19px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .title-group p { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
-        .live-tag { display: inline-flex; align-items: center; gap: 5px; background: rgba(14, 203, 129, 0.15); color: var(--green); padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid rgba(14, 203, 129, 0.3); }
-        .live-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; box-shadow: 0 0 6px var(--green); }
-        .utc-badge { background: #2962ff25; color: #64b5f6; border: 1px solid #2962ff55; padding: 2px 7px; border-radius: 4px; font-size: 10.5px; font-weight: 700; }
-        .header-meta { font-size: 12px; color: var(--text-dim); text-align: right; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .title-group h1 { font-size: 18px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px; }
+        .live-tag { display: inline-flex; align-items: center; gap: 4px; background: rgba(14, 203, 129, 0.15); color: var(--green); padding: 2px 7px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid rgba(14, 203, 129, 0.3); }
+        .live-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; box-shadow: 0 0 6px var(--green); }
+        .utc-badge { background: #2962ff25; color: #64b5f6; border: 1px solid #2962ff55; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; }
+        .header-meta { font-size: 11.5px; color: var(--text-dim); }
 
-        /* STATS BAR (Snap scroll on mobile) */
-        .stats-grid { display: flex; overflow-x: auto; gap: 10px; margin-bottom: 14px; padding-bottom: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
-        .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; min-width: 145px; flex: 1 0 auto; scroll-snap-align: start; }
-        .stat-label { color: var(--text-dim); font-size: 11px; margin-bottom: 3px; }
-        .stat-value { font-size: 18px; font-weight: 700; }
+        /* STATS BAR */
+        .stats-grid { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 12px; padding-bottom: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+        .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; min-width: 130px; flex: 1 0 auto; scroll-snap-align: start; }
+        .stat-label { color: var(--text-dim); font-size: 11px; margin-bottom: 2px; }
+        .stat-value { font-size: 17px; font-weight: 700; }
         .stat-value.green { color: var(--green); }
         .stat-value.red { color: var(--red); }
         .stat-value.yellow { color: var(--yellow); }
         .stat-value.blue { color: #64b5f6; }
         .stat-value.orange { color: var(--orange); }
-        .stat-sub { font-size: 10.5px; color: var(--text-dim); margin-top: 2px; }
+        .stat-sub { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
 
-        /* COLLAPSIBLE FILTER ACCORDION */
-        .config-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); overflow: hidden; }
-        .config-toggle-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; cursor: pointer; user-select: none; background: #131822; border-bottom: 1px solid transparent; }
-        .config-toggle-header.active { border-bottom-color: var(--border); }
-        .config-toggle-title { font-size: 13px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px; }
-        .config-badge { background: rgba(240, 185, 11, 0.15); color: var(--yellow); border: 1px solid rgba(240, 185, 11, 0.3); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-        .config-arrow { font-size: 12px; color: var(--text-dim); transition: transform 0.2s; }
+        /* COLLAPSIBLE FILTERS */
+        .config-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; box-shadow: 0 3px 14px rgba(0,0,0,0.25); overflow: hidden; }
+        .config-toggle-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; cursor: pointer; user-select: none; background: #131822; }
+        .config-toggle-header.active { border-bottom: 1px solid var(--border); }
+        .config-toggle-title { font-size: 12.5px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px; }
+        .config-badge { background: rgba(240, 185, 11, 0.15); color: var(--yellow); border: 1px solid rgba(240, 185, 11, 0.3); padding: 2px 7px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+        .config-arrow { font-size: 11px; color: var(--text-dim); transition: transform 0.2s; }
         .config-arrow.open { transform: rotate(180deg); }
-        .config-body { padding: 14px 16px; display: block; }
+        .config-body { padding: 12px 14px; display: block; }
         .config-body.collapsed { display: none; }
 
-        .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
-        .config-section-title { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); margin-bottom: 7px; display: flex; align-items: center; justify-content: space-between; }
+        .config-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+        .config-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
         
-        .pill-group { display: flex; gap: 6px; flex-wrap: wrap; }
-        .pill-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: #19202e; color: var(--text); cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; user-select: none; min-height: 34px; display: inline-flex; align-items: center; justify-content: center; }
+        .pill-group { display: flex; gap: 5px; flex-wrap: wrap; }
+        .pill-btn { padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); background: #19202e; color: var(--text); cursor: pointer; font-size: 11.5px; font-weight: 600; transition: all 0.15s; user-select: none; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; }
         .pill-btn:hover { background: #232c40; color: #fff; border-color: #3e4c6b; }
         .pill-btn.active { background: var(--yellow); color: #000; border-color: var(--yellow); font-weight: 700; }
 
@@ -370,36 +369,35 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .cond-btn.active.cond-below { background: var(--red); color: #fff; border-color: var(--red); }
         .cond-btn.active.cond-all { background: var(--yellow); color: #000; border-color: var(--yellow); }
 
-        .filter-select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: #19202e; color: #fff; font-size: 14px; outline: none; width: 100%; cursor: pointer; min-height: 38px; }
+        .filter-select { padding: 6px 9px; border-radius: 6px; border: 1px solid var(--border); background: #19202e; color: #fff; font-size: 13.5px; outline: none; width: 100%; cursor: pointer; min-height: 36px; }
         .filter-select:focus { border-color: var(--yellow); }
 
-        .mc-inputs-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
-        .input-box { flex: 1; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: #19202e; color: #fff; font-size: 14px; outline: none; min-height: 36px; }
+        .mc-inputs-row { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; }
+        .input-box { flex: 1; padding: 6px 9px; border-radius: 6px; border: 1px solid var(--border); background: #19202e; color: #fff; font-size: 13.5px; outline: none; min-height: 34px; }
         .input-box:focus { border-color: var(--yellow); }
 
-        .action-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); justify-content: space-between; }
-        .btn-main { background: var(--yellow); color: #000; font-weight: 700; padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer; font-size: 13.5px; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+        .action-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); justify-content: space-between; }
+        .btn-main { background: var(--yellow); color: #000; font-weight: 700; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 12.5px; transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px; }
         .btn-main:active { transform: scale(0.98); }
-        .btn-secondary { background: #19202e; color: var(--text); padding: 9px 15px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; font-size: 13px; font-weight: 600; }
+        .btn-secondary { background: #19202e; color: var(--text); padding: 8px 13px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; font-size: 12.5px; font-weight: 600; }
 
-        /* VIEW SWITCHER & SEARCH CONTROLS */
-        .controls { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
-        .controls-left { display: flex; gap: 8px; align-items: center; flex: 1; min-width: 250px; }
-        .search-box { flex: 1; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: #fff; font-size: 14px; outline: none; min-height: 38px; }
+        /* CONTROLS */
+        .controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+        .controls-left { display: flex; gap: 8px; align-items: center; flex: 1; min-width: 200px; }
+        .search-box { flex: 1; padding: 8px 11px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); color: #fff; font-size: 13.5px; outline: none; min-height: 36px; }
         .search-box:focus { border-color: var(--yellow); }
 
-        .view-switch { display: inline-flex; background: #19202e; border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
-        .view-btn { padding: 6px 12px; border-radius: 6px; border: none; background: transparent; color: var(--text-dim); font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .view-switch { display: inline-flex; background: #19202e; border: 1px solid var(--border); border-radius: 6px; padding: 2px; }
+        .view-btn { padding: 5px 10px; border-radius: 4px; border: none; background: transparent; color: var(--text-dim); font-size: 11.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
         .view-btn.active { background: #232c40; color: #fff; }
 
-        /* BADGES & TAGS */
-        .pill-tag { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+        /* BADGES */
+        .pill-tag { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
         .pill-tag.green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(14, 203, 129, 0.3); }
         .pill-tag.red { background: var(--red-bg); color: var(--red); border: 1px solid rgba(246, 70, 93, 0.3); }
         .pill-tag.yellow { background: var(--yellow-bg); color: var(--yellow); border: 1px solid rgba(240, 185, 11, 0.3); }
-        .pill-tag.orange { background: var(--orange-bg); color: var(--orange); border: 1px solid rgba(255, 152, 0, 0.4); }
 
-        .diff-badge { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 12.5px; }
+        .diff-badge { display: inline-flex; align-items: center; gap: 3px; padding: 3px 7px; border-radius: 5px; font-weight: 700; font-size: 12px; }
         .diff-badge.green { background: rgba(14, 203, 129, 0.18); color: var(--green); border: 1px solid rgba(14, 203, 129, 0.4); }
         .diff-badge.red { background: rgba(246, 70, 93, 0.18); color: var(--red); border: 1px solid rgba(246, 70, 93, 0.4); }
         
@@ -407,114 +405,96 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .text-red { color: var(--red); font-weight: 700; }
         .text-purple { color: var(--purple); font-weight: 600; }
         .text-orange { color: var(--orange); font-weight: 700; }
-        .symbol-cell { font-weight: 700; color: #fff; font-size: 14px; }
-        .symbol-sub { font-size: 10.5px; color: var(--text-dim); margin-left: 2px; }
+        .symbol-cell { font-weight: 700; color: #fff; font-size: 13.5px; }
+        .symbol-sub { font-size: 10px; color: var(--text-dim); margin-left: 2px; }
 
-        /* ================= MOBILE-FIRST CARD VIEW ================= */
-        .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
-        .crypto-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 14px;
-            transition: all 0.15s;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
+        /* CARDS */
+        .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 9px; }
+        .crypto-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; transition: all 0.15s; }
         .crypto-card:hover { border-color: #3e4c6b; background: var(--card-hover); }
         
-        .card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .card-sym-title { font-size: 16px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px; }
-        .card-price-display { font-size: 16px; font-weight: 700; color: #fff; }
+        .card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
+        .card-sym-title { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 5px; }
+        .card-price-display { font-size: 15px; font-weight: 700; color: #fff; }
 
         .card-focus-bar {
             background: rgba(41, 98, 255, 0.08);
             border: 1px solid rgba(41, 98, 255, 0.22);
-            border-radius: 8px;
-            padding: 8px 10px;
-            margin-bottom: 8px;
+            border-radius: 7px;
+            padding: 7px 9px;
+            margin-bottom: 7px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .focus-title { font-size: 11.5px; color: var(--text-dim); }
-        .focus-open { font-size: 12px; font-weight: 600; color: #fff; margin-top: 1px; }
+        .focus-title { font-size: 11px; color: var(--text-dim); }
+        .focus-open { font-size: 11.5px; font-weight: 600; color: #fff; }
 
         .card-metrics-row {
             display: flex;
             justify-content: space-between;
-            font-size: 11.5px;
+            font-size: 11px;
             color: var(--text-dim);
-            margin-bottom: 10px;
-            padding-bottom: 8px;
+            margin-bottom: 8px;
+            padding-bottom: 7px;
             border-bottom: 1px dashed rgba(255,255,255,0.08);
         }
 
-        /* 6-TIMEFRAME HEATMAP IN CARD */
-        .tf-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
-        .tf-tile {
-            background: #19202e;
-            border-radius: 6px;
-            padding: 5px 2px;
-            text-align: center;
-            border: 1px solid var(--border);
-        }
-        .tf-tile-name { font-size: 9.5px; color: var(--text-dim); font-weight: 700; margin-bottom: 2px; }
-        .tf-tile-val { font-size: 11.5px; font-weight: 700; white-space: nowrap; }
-        .tf-tile.highlight { border-color: var(--yellow); box-shadow: 0 0 6px rgba(240, 185, 11, 0.3); }
+        .tf-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; }
+        .tf-tile { background: #19202e; border-radius: 5px; padding: 4px 2px; text-align: center; border: 1px solid var(--border); }
+        .tf-tile-name { font-size: 9px; color: var(--text-dim); font-weight: 700; margin-bottom: 1px; }
+        .tf-tile-val { font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .tf-tile.highlight { border-color: var(--yellow); box-shadow: 0 0 5px rgba(240, 185, 11, 0.3); }
 
-        /* ================= TABLE VIEW ================= */
-        .table-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-        th { background: #171d29; padding: 10px 12px; color: var(--text-dim); font-weight: 600; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        /* TABLE */
+        .table-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12.5px; }
+        th { background: #171d29; padding: 9px 11px; color: var(--text-dim); font-weight: 600; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); white-space: nowrap; }
         th:hover { color: #fff; }
         th.active-sort { color: var(--yellow); }
         th.col-focus { background: #1a2538; color: #fff; }
-        td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        td { padding: 9px 11px; border-bottom: 1px solid var(--border); white-space: nowrap; }
         td.col-focus { background: rgba(41, 98, 255, 0.05); }
         tr:hover td { background: var(--card-hover); }
 
-        /* STICKY COLUMNS FOR MOBILE HORIZONTAL SCROLL */
-        th.col-sticky-1, td.col-sticky-1 { position: sticky; left: 0; z-index: 3; background: #151a24; width: 34px; text-align: center; }
-        th.col-sticky-2, td.col-sticky-2 { position: sticky; left: 34px; z-index: 3; background: #151a24; box-shadow: 3px 0 6px rgba(0,0,0,0.35); }
+        /* STICKY COLUMNS */
+        th.col-sticky-1, td.col-sticky-1 { position: sticky; left: 0; z-index: 3; background: #151a24; width: 30px; text-align: center; }
+        th.col-sticky-2, td.col-sticky-2 { position: sticky; left: 30px; z-index: 3; background: #151a24; box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
         th.col-sticky-1, th.col-sticky-2 { background: #171d29; z-index: 4; }
 
-        /* FLOATING ACTION BUTTON (RESCAN) */
+        /* FAB */
         .fab-rescan {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 18px;
+            right: 18px;
             background: var(--yellow);
             color: #000;
             font-weight: 700;
-            padding: 12px 18px;
-            border-radius: 30px;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.6);
+            padding: 10px 16px;
+            border-radius: 25px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.5);
             border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 6px;
             z-index: 999;
-            font-size: 13px;
+            font-size: 12px;
             transition: all 0.2s;
         }
         .fab-rescan:active { transform: scale(0.95); }
 
         /* LOADING */
-        #loading { display: none; text-align: center; padding: 40px 16px; }
-        .spinner { border: 3px solid rgba(240, 185, 11, 0.15); border-top: 3px solid var(--yellow); border-radius: 50%; width: 36px; height: 36px; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+        #loading { display: none; text-align: center; padding: 36px 14px; }
+        .spinner { border: 3px solid rgba(240, 185, 11, 0.15); border-top: 3px solid var(--yellow); border-radius: 50%; width: 32px; height: 32px; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-text { font-size: 15px; font-weight: 600; color: var(--yellow); }
-        .loading-sub { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+        .loading-text { font-size: 14px; font-weight: 600; color: var(--yellow); }
 
-        /* MOBILE MEDIA QUERIES */
         @media (max-width: 768px) {
-            body { padding: 10px 8px 85px 8px; }
-            .header { padding-bottom: 8px; margin-bottom: 10px; }
-            .title-group h1 { font-size: 16.5px; }
-            .controls-left { width: 100%; min-width: 0; }
-            .search-box, .filter-select, .input-box { font-size: 16px !important; } /* Stops iOS auto-zoom */
-            .tf-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; }
+            body { padding: 10px 8px 80px 8px; }
+            .header h1 { font-size: 16px; }
+            .search-box, .filter-select, .input-box { font-size: 16px !important; }
+            .tf-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
         }
     </style>
 </head>
@@ -522,47 +502,46 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <!-- HEADER -->
     <div class="header">
         <div class="title-group">
-            <h1>Binance Scanner <span class="utc-badge">🌐 UTC 00:00</span> <span class="live-tag"><span class="live-dot"></span> LIVE</span></h1>
-            <p>Quét đa khung quốc tế, lọc Market Cap & Funding Rate</p>
+            <h1>Binance Futures Scanner <span class="utc-badge">UTC 00:00</span> <span class="live-tag"><span class="live-dot"></span> LIVE</span></h1>
         </div>
-        <div class="header-meta" id="lastScanTime">Đang kết nối...</div>
+        <div class="header-meta" id="lastScanTime">Syncing...</div>
     </div>
 
-    <!-- STATS (Snap Scroll) -->
+    <!-- STATS -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">Tổng cặp Futures</div>
+            <div class="stat-label">Total Pairs</div>
             <div class="stat-value" id="statTotal">-</div>
-            <div class="stat-sub">Hợp đồng USDT-M</div>
+            <div class="stat-sub">USDT-M Perpetual</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">NẰM TRÊN Open</div>
+            <div class="stat-label">> Open (Bull)</div>
             <div class="stat-value green" id="statAbove">-</div>
             <div class="stat-sub" id="statAbovePct">-</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">NẰM DƯỚI Open</div>
+            <div class="stat-label">< Open (Bear)</div>
             <div class="stat-value red" id="statBelow">-</div>
             <div class="stat-sub" id="statBelowPct">-</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Lệch Open TB (Đang xét)</div>
+            <div class="stat-label">Avg Dev. (Focus)</div>
             <div class="stat-value blue" id="statAvgDist">-</div>
-            <div class="stat-sub" id="statAvgDistSub">Trung bình độ lệch %</div>
+            <div class="stat-sub" id="statAvgDistSub">% from Open</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Funding Rate Âm 🔥</div>
+            <div class="stat-label">Neg. FR 🔥</div>
             <div class="stat-value orange" id="statNegFr">-</div>
-            <div class="stat-sub" id="statNegFrSub">Canh Short Squeeze</div>
+            <div class="stat-sub" id="statNegFrSub">Short Squeeze Watch</div>
         </div>
     </div>
 
-    <!-- COLLAPSIBLE FILTER ACCORDION -->
+    <!-- COLLAPSIBLE FILTERS -->
     <div class="config-card">
         <div class="config-toggle-header" id="configHeader" onclick="toggleConfig()">
             <div class="config-toggle-title">
-                <span>⚙️ Bộ Lọc Tùy Chỉnh</span>
-                <span class="config-badge" id="activeConfigSummary">1W | 🟢 TRÊN Open</span>
+                <span>⚙️ Filters</span>
+                <span class="config-badge" id="activeConfigSummary">1W | > Open</span>
             </div>
             <div class="config-arrow" id="configArrow">▼</div>
         </div>
@@ -571,7 +550,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <div class="config-grid">
                 <!-- 1. Timeframe -->
                 <div>
-                    <div class="config-section-title">⏱️ 1. Khung Thời Gian (UTC)</div>
+                    <div class="config-section-title">⏱️ 1. Timeframe (UTC)</div>
                     <div class="pill-group" id="tfGroup">
                         <button class="pill-btn" data-tf="1d" onclick="selectFilterTf('1d')">1D</button>
                         <button class="pill-btn active" data-tf="1w" onclick="selectFilterTf('1w')">1W</button>
@@ -582,29 +561,29 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 2. Position condition -->
+                <!-- 2. Position Condition -->
                 <div>
-                    <div class="config-section-title">🎯 2. Điều Kiện Vị Trí Giá</div>
+                    <div class="config-section-title">🎯 2. Price Position</div>
                     <div class="pill-group" id="condGroup">
-                        <button class="pill-btn cond-btn active cond-above" data-cond="above" onclick="selectFilterCond('above')">🟢 TRÊN Open</button>
-                        <button class="pill-btn cond-btn cond-below" data-cond="below" onclick="selectFilterCond('below')">🔴 DƯỚI Open</button>
-                        <button class="pill-btn cond-btn cond-all" data-cond="all" onclick="selectFilterCond('all')">⚪ Tất Cả</button>
+                        <button class="pill-btn cond-btn active cond-above" data-cond="above" onclick="selectFilterCond('above')">🟢 > Open</button>
+                        <button class="pill-btn cond-btn cond-below" data-cond="below" onclick="selectFilterCond('below')">🔴 < Open</button>
+                        <button class="pill-btn cond-btn cond-all" data-cond="all" onclick="selectFilterCond('all')">⚪ All</button>
                     </div>
                 </div>
 
                 <!-- 3. Market Cap -->
                 <div>
                     <div class="config-section-title">
-                        <span>💎 3. Market Cap (Vốn Hóa)</span>
-                        <span style="color:#b388ff; font-size:11px;" id="mcActiveLabel">Tất cả</span>
+                        <span>💎 3. Market Cap</span>
+                        <span style="color:#b388ff; font-size:11px;" id="mcActiveLabel">All</span>
                     </div>
                     <div class="mc-inputs-row">
-                        <input type="text" id="minMcInput" class="input-box" placeholder="Min (50M, 100M)" oninput="onMcInput()">
+                        <input type="text" id="minMcInput" class="input-box" placeholder="Min (e.g. 50M)" oninput="onMcInput()">
                         <span style="color:var(--text-dim);">-</span>
-                        <input type="text" id="maxMcInput" class="input-box" placeholder="Max (1B, 500M)" oninput="onMcInput()">
+                        <input type="text" id="maxMcInput" class="input-box" placeholder="Max (e.g. 1B)" oninput="onMcInput()">
                     </div>
                     <div class="pill-group">
-                        <button class="pill-btn" style="padding:2px 7px; font-size:11px;" onclick="setMcPreset(0, 0)">Tất cả</button>
+                        <button class="pill-btn" style="padding:2px 7px; font-size:11px;" onclick="setMcPreset(0, 0)">All</button>
                         <button class="pill-btn" style="padding:2px 7px; font-size:11px;" onclick="setMcPreset(0, 50e6)">&lt;50M</button>
                         <button class="pill-btn" style="padding:2px 7px; font-size:11px;" onclick="setMcPreset(50e6, 300e6)">50M-300M</button>
                         <button class="pill-btn" style="padding:2px 7px; font-size:11px;" onclick="setMcPreset(300e6, 1e9)">300M-1B</button>
@@ -614,50 +593,50 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
                 <!-- 4. Funding Rate & Volume -->
                 <div>
-                    <div class="config-section-title">⚡ 4. Funding Rate & Volume 24h</div>
-                    <div style="display:flex; gap:8px;">
+                    <div class="config-section-title">⚡ 4. Funding Rate & 24h Vol</div>
+                    <div style="display:flex; gap:6px;">
                         <select id="frSelect" class="filter-select" onchange="renderView()" style="flex:1;">
-                            <option value="all">Mọi Funding</option>
-                            <option value="neg">🔥 Funding Âm (&lt;0%)</option>
-                            <option value="neg_deep">⚠️ Âm Sâu (&lt;-0.05%)</option>
-                            <option value="pos">📈 Funding Dương (&gt;0%)</option>
-                            <option value="pos_high">⚡ Dương Cao (&gt;0.03%)</option>
+                            <option value="all">All FR</option>
+                            <option value="neg">🔥 Neg FR (&lt;0%)</option>
+                            <option value="neg_deep">⚠️ Deep Neg (&lt;-0.05%)</option>
+                            <option value="pos">📈 Pos FR (&gt;0%)</option>
+                            <option value="pos_high">⚡ High Pos (&gt;0.03%)</option>
                         </select>
                         <select id="minVolSelect" class="filter-select" onchange="renderView()" style="flex:1;">
-                            <option value="0">Mọi Volume</option>
-                            <option value="1000000">&gt;$1M Vol</option>
-                            <option value="5000000">&gt;$5M Vol</option>
-                            <option value="20000000">&gt;$20M Vol</option>
+                            <option value="0">All Vol</option>
+                            <option value="1000000">&gt;$1M</option>
+                            <option value="5000000">&gt;$5M</option>
+                            <option value="20000000">&gt;$20M</option>
                         </select>
                     </div>
                 </div>
             </div>
 
             <div class="action-row">
-                <div style="font-size:12px; color:var(--text-dim);">
-                    Bấm để áp dụng bộ lọc ngay lập tức
+                <div style="font-size:11.5px; color:var(--text-dim);" id="deviceInfoTag">
+                    Auto-configured for your screen
                 </div>
-                <div style="display:flex; gap:8px;">
-                    <button class="btn-main" onclick="fetchScan(true)">🚀 Quét Lại (Rescan)</button>
-                    <button class="btn-secondary" onclick="exportCSV()">📥 Xuất Excel</button>
+                <div style="display:flex; gap:6px;">
+                    <button class="btn-main" onclick="fetchScan(true)">🚀 Rescan</button>
+                    <button class="btn-secondary" onclick="exportCSV()">📥 CSV</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CONTROLS & VIEW TOGGLE -->
+    <!-- CONTROLS -->
     <div class="controls">
         <div class="controls-left">
-            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Tìm token (BTC, SOL, SUI, PEPE...)" oninput="renderView()">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search (BTC, SOL, SUI, PEPE...)" oninput="renderView()">
         </div>
-        <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; width:100%;">
-            <div style="font-size:13px; font-weight:600; color:var(--text-dim);">
-                Hiển thị: <b style="color:#fff;" id="resultCount">0</b> token
+        <div style="display:flex; gap:8px; align-items:center; justify-content:space-between; width:100%;">
+            <div style="font-size:12.5px; font-weight:600; color:var(--text-dim);">
+                Pairs: <b style="color:#fff;" id="resultCount">0</b>
             </div>
             <!-- View Switcher -->
             <div class="view-switch">
-                <button class="view-btn active" id="btnViewCards" onclick="switchView('cards')">🎴 Thẻ (Mobile)</button>
-                <button class="view-btn" id="btnViewTable" onclick="switchView('table')">📋 Bảng</button>
+                <button class="view-btn" id="btnViewCards" onclick="switchView('cards')">🎴 Cards</button>
+                <button class="view-btn" id="btnViewTable" onclick="switchView('table')">📋 Table</button>
             </div>
         </div>
     </div>
@@ -665,59 +644,64 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     <!-- LOADING -->
     <div id="loading">
         <div class="spinner"></div>
-        <div class="loading-text">⚡ Đang quét thị trường Binance Futures & Funding Rate...</div>
-        <div class="loading-sub">Chờ 4 - 7 giây dữ liệu thời gian thực...</div>
+        <div class="loading-text">⚡ Scanning Binance Futures & Funding Rates...</div>
     </div>
 
-    <!-- VIEW CONTAINER: CARDS (Default on mobile) -->
+    <!-- VIEW CONTAINERS -->
     <div class="card-container" id="cardContainer"></div>
 
-    <!-- VIEW CONTAINER: TABLE (Detailed on desktop/tablet) -->
     <div class="table-container" id="tableContainer" style="display:none;">
         <table>
             <thead>
                 <tr>
                     <th class="col-sticky-1" onclick="changeSort('index')">#</th>
-                    <th class="col-sticky-2" onclick="changeSort('symbol')">Cặp</th>
-                    <th onclick="changeSort('current_price')">Giá Hiện Tại</th>
-                    <th onclick="changeSort('funding_rate')">⚡ Funding ⬍</th>
-                    <th onclick="changeSort('market_cap')">💎 Market Cap ⬍</th>
-                    <th class="col-focus" id="th_open_active">Giá Open</th>
-                    <th class="col-focus" id="th_diff_pct" onclick="changeSort('diff_pct')">🔥 Cách Open (%) ⬍</th>
-                    <th id="th_pct_1d" onclick="changeSort('pct_1d')">% 1D ⬍</th>
-                    <th id="th_pct_1w" onclick="changeSort('pct_1w')">% 1W ⬍</th>
-                    <th id="th_pct_2w" onclick="changeSort('pct_2w')">% 2W ⬍</th>
-                    <th id="th_pct_1m" onclick="changeSort('pct_1m')">% 1M ⬍</th>
-                    <th id="th_pct_3m" onclick="changeSort('pct_3m')">% 3M ⬍</th>
-                    <th id="th_pct_6m" onclick="changeSort('pct_6m')">% 6M ⬍</th>
-                    <th onclick="changeSort('volume_24h')">Volume 24h</th>
-                    <th onclick="changeSort('green_count')">Sức Mạnh ⬍</th>
+                    <th class="col-sticky-2" onclick="changeSort('symbol')">Symbol</th>
+                    <th onclick="changeSort('current_price')">Price</th>
+                    <th onclick="changeSort('funding_rate')">⚡ FR ⬍</th>
+                    <th onclick="changeSort('market_cap')">💎 MCap ⬍</th>
+                    <th class="col-focus" id="th_open_active">Open</th>
+                    <th class="col-focus" id="th_diff_pct" onclick="changeSort('diff_pct')">🔥 % Dev. ⬍</th>
+                    <th id="th_pct_1d" onclick="changeSort('pct_1d')">1D % ⬍</th>
+                    <th id="th_pct_1w" onclick="changeSort('pct_1w')">1W % ⬍</th>
+                    <th id="th_pct_2w" onclick="changeSort('pct_2w')">2W % ⬍</th>
+                    <th id="th_pct_1m" onclick="changeSort('pct_1m')">1M % ⬍</th>
+                    <th id="th_pct_3m" onclick="changeSort('pct_3m')">3M % ⬍</th>
+                    <th id="th_pct_6m" onclick="changeSort('pct_6m')">6M % ⬍</th>
+                    <th onclick="changeSort('volume_24h')">24h Vol</th>
+                    <th onclick="changeSort('green_count')">Trend ⬍</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
     </div>
 
-    <!-- FLOATING ACTION BUTTON (RESCAN ON MOBILE) -->
+    <!-- FAB RESCAN -->
     <button class="fab-rescan" onclick="fetchScan(true)">
-        🔄 <span>Quét Lại</span>
+        🔄 <span>Rescan</span>
     </button>
 
     <script>
+        // SMART AUTO-DETECTION: Mobile vs Desktop
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth <= 768);
+        
         let currentFilterTf = '1w';
         let currentFilterCond = 'above';
         let allTokens = [];
         let currentSort = { col: 'diff_pct', dir: 'desc' };
-        let currentView = (window.innerWidth <= 768) ? 'cards' : 'cards'; // Mặc định Card view đẹp trên mobile
+        let currentView = isMobile ? 'cards' : 'table';
 
-        const tfLabels = {
-            '1d': '1D (Hôm nay)',
-            '1w': '1W (Tuần này)',
-            '2w': '2W (2 Tuần)',
-            '1m': '1M (Tháng này)',
-            '3m': '3M (Quý)',
-            '6m': '6M (6 Tháng)'
-        };
+        // Auto collapse filters on mobile to preserve viewport space
+        if (isMobile) {
+            document.addEventListener('DOMContentLoaded', () => {
+                const body = document.getElementById('configBody');
+                if (body) body.classList.add('collapsed');
+                const arrow = document.getElementById('configArrow');
+                if (arrow) arrow.classList.remove('open');
+                const header = document.getElementById('configHeader');
+                if (header) header.classList.remove('active');
+                document.getElementById('deviceInfoTag').innerText = '📱 Mobile mode: Cards default';
+            });
+        }
 
         function toggleConfig() {
             const body = document.getElementById('configBody');
@@ -782,15 +766,15 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         function updateConfigSummary() {
             const condLabels = {
-                'above': '🟢 TRÊN Open',
-                'below': '🔴 DƯỚI Open',
-                'all': '⚪ Tất cả'
+                'above': '> Open',
+                'below': '< Open',
+                'all': 'All'
             };
-            const label = tfLabels[currentFilterTf];
+            const label = currentFilterTf.toUpperCase();
             document.getElementById('activeConfigSummary').innerText = `${label} | ${condLabels[currentFilterCond]}`;
             
-            document.getElementById('th_open_active').innerText = `Open (${currentFilterTf.toUpperCase()})`;
-            document.getElementById('th_diff_pct').innerText = `🔥 Cách Open (${currentFilterTf.toUpperCase()}) ⬍`;
+            document.getElementById('th_open_active').innerText = `Open (${label})`;
+            document.getElementById('th_diff_pct').innerText = `🔥 % Dev. (${label}) ⬍`;
         }
 
         function selectFilterTf(tf) {
@@ -821,7 +805,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         function onMcInput() {
             const minMc = parseAmount(document.getElementById('minMcInput').value);
             const maxMc = parseAmount(document.getElementById('maxMcInput').value);
-            let label = 'Tất cả';
+            let label = 'All';
             if (minMc && maxMc) label = `${formatVolume(minMc)} - ${formatVolume(maxMc)}`;
             else if (minMc) label = `≥ ${formatVolume(minMc)}`;
             else if (maxMc) label = `≤ ${formatVolume(maxMc)}`;
@@ -841,10 +825,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             document.getElementById('statTotal').innerText = total;
             document.getElementById('statAbove').innerText = aboveCount;
             document.getElementById('statBelow').innerText = belowCount;
-            document.getElementById('statAbovePct').innerText = `${((aboveCount/total)*100).toFixed(1)}% thị trường`;
-            document.getElementById('statBelowPct').innerText = `${((belowCount/total)*100).toFixed(1)}% thị trường`;
+            document.getElementById('statAbovePct').innerText = `${((aboveCount/total)*100).toFixed(1)}% market`;
+            document.getElementById('statBelowPct').innerText = `${((belowCount/total)*100).toFixed(1)}% market`;
             document.getElementById('statNegFr').innerText = negFrCount;
-            document.getElementById('statNegFrSub').innerText = `${((negFrCount/total)*100).toFixed(1)}% thị trường âm`;
+            document.getElementById('statNegFrSub').innerText = `${((negFrCount/total)*100).toFixed(1)}% neg pairs`;
 
             let targetGroup = allTokens;
             if (currentFilterCond === 'above') targetGroup = allTokens.filter(t => t[aboveKey]);
@@ -854,7 +838,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 const avg = targetGroup.reduce((sum, t) => sum + t[pctKey], 0) / targetGroup.length;
                 const sign = avg >= 0 ? '+' : '';
                 document.getElementById('statAvgDist').innerText = `${sign}${avg.toFixed(2)}%`;
-                document.getElementById('statAvgDistSub').innerText = `TB ${targetGroup.length} token (${currentFilterTf.toUpperCase()})`;
+                document.getElementById('statAvgDistSub').innerText = `Avg of ${targetGroup.length} (${currentFilterTf.toUpperCase()})`;
             } else {
                 document.getElementById('statAvgDist').innerText = '0.00%';
             }
@@ -873,9 +857,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 document.getElementById('lastScanTime').innerText = `${data.scan_time} UTC`;
                 updateConfigSummary();
                 updateStats();
-                renderView();
+                switchView(currentView);
             } catch (err) {
-                alert('Lỗi quét dữ liệu: ' + err);
+                alert('Scan error: ' + err);
             } finally {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('cardContainer').style.opacity = '1';
@@ -968,9 +952,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 const diffSymbol = isGreen ? '▲ +' : '▼ ';
                 
                 let strengthBadge = '';
-                if (t.green_count >= 5) strengthBadge = `<span class="pill-tag green">🟢 Siêu Khỏe (${t.green_count}/6)</span>`;
-                else if (t.green_count >= 3) strengthBadge = `<span class="pill-tag yellow">🟡 Trung Lập (${t.green_count}/6)</span>`;
-                else strengthBadge = `<span class="pill-tag red">🔴 Yếu (${t.green_count}/6)</span>`;
+                if (t.green_count >= 5) strengthBadge = `<span class="pill-tag green">🟢 Bull (${t.green_count}/6)</span>`;
+                else if (t.green_count >= 3) strengthBadge = `<span class="pill-tag yellow">🟡 Neutral (${t.green_count}/6)</span>`;
+                else strengthBadge = `<span class="pill-tag red">🔴 Bear (${t.green_count}/6)</span>`;
 
                 const makeTile = (label, pct, tfKey) => {
                     const isHigh = currentFilterTf === tfKey;
@@ -989,7 +973,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 card.innerHTML = `
                     <div class="card-header-row">
                         <div class="card-sym-title">
-                            <span style="color:var(--text-dim); font-size:12px;">#${index + 1}</span>
+                            <span style="color:var(--text-dim); font-size:11px;">#${index + 1}</span>
                             <span>${t.base}</span>
                             <span class="symbol-sub">USDT</span>
                             ${strengthBadge}
@@ -999,16 +983,16 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
                     <div class="card-focus-bar">
                         <div>
-                            <div class="focus-title">Cách Open ${currentFilterTf.toUpperCase()} (UTC)</div>
-                            <div class="focus-open">Mở cửa: $${formatNumber(openVal)}</div>
+                            <div class="focus-title">${currentFilterTf.toUpperCase()} Open Dev. (UTC)</div>
+                            <div class="focus-open">Open: $${formatNumber(openVal)}</div>
                         </div>
-                        <div class="diff-badge ${diffCls}" style="font-size:13.5px;">
+                        <div class="diff-badge ${diffCls}" style="font-size:13px;">
                             ${diffSymbol}${Math.abs(diffPct).toFixed(2)}%
                         </div>
                     </div>
 
                     <div class="card-metrics-row">
-                        <div>⚡ Funding: ${getFundingBadge(t.funding_rate)}</div>
+                        <div>⚡ FR: ${getFundingBadge(t.funding_rate)}</div>
                         <div>💎 MC: ${formatMarketCap(t.market_cap)}</div>
                         <div>📊 Vol: <b>${formatVolume(t.volume_24h)}</b></div>
                     </div>
@@ -1045,9 +1029,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                 const diffSymbol = isGreen ? '▲ +' : '▼ ';
                 
                 let strengthTag = '';
-                if (t.green_count >= 5) strengthTag = `<span class="pill-tag green">🟢 Khỏe (${t.green_count}/6)</span>`;
-                else if (t.green_count >= 3) strengthTag = `<span class="pill-tag yellow">🟡 TB (${t.green_count}/6)</span>`;
-                else strengthTag = `<span class="pill-tag red">🔴 Yếu (${t.green_count}/6)</span>`;
+                if (t.green_count >= 5) strengthTag = `<span class="pill-tag green">Bull (${t.green_count}/6)</span>`;
+                else if (t.green_count >= 3) strengthTag = `<span class="pill-tag yellow">Neutral (${t.green_count}/6)</span>`;
+                else strengthTag = `<span class="pill-tag red">Bear (${t.green_count}/6)</span>`;
 
                 tr.innerHTML = `
                     <td class="col-sticky-1" style="color:var(--text-dim);">${index + 1}</td>
@@ -1085,7 +1069,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             window.location.href = `/api/export-csv?timeframe=${currentFilterTf}&condition=${currentFilterCond}&min_vol=${minVol}&fr=${fr}&min_mc=${minMc}&max_mc=${maxMc}`;
         }
 
-        // Tự động quét lần đầu
+        // Auto initial fetch
         fetchScan();
     </script>
 </body>
