@@ -55,10 +55,12 @@ def get_funding_rates():
 
 def get_market_caps():
     mc_map = {}
+    
+    # 1. Primary: Binance Composite Market Cap API
     try:
         url = 'https://www.binance.com/bapi/composite/v1/public/marketing/symbol/list'
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
-        data = json.loads(urllib.request.urlopen(req, timeout=5).read()).get('data', [])
+        data = json.loads(urllib.request.urlopen(req, timeout=6).read()).get('data', [])
         for item in data:
             base = item.get('baseAsset', '').upper()
             sym = item.get('symbol', '').upper()
@@ -68,6 +70,21 @@ def get_market_caps():
     except Exception:
         pass
 
+    # 2. Fallback: CoinMarketCap Public Listing (covers top 1,500 coins missing on Binance)
+    try:
+        url = 'https://api.coinmarketcap.com/data-api/v3/cryptocurrency/listing?start=1&limit=1500&sortBy=market_cap&sortType=desc'
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
+        d = json.loads(urllib.request.urlopen(req, timeout=7).read())
+        for c in d.get('data', {}).get('cryptoCurrencyList', []):
+            sym = c.get('symbol', '').upper()
+            quotes = c.get('quotes', [])
+            mc = quotes[0].get('marketCap') if quotes else None
+            if sym and mc and sym not in mc_map:
+                mc_map[sym] = float(mc)
+    except Exception:
+        pass
+
+    # 3. Fallback: CoinGecko Top Coins (covers additional niche tokens)
     try:
         url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1'
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -169,12 +186,14 @@ def run_scan():
 
                 base = sym.replace('USDT', '')
                 clean_base = base
-                for prefix in ['1000000', '1000', '100']:
+                for prefix in ['1000000', '100000', '10000', '1000', '100']:
                     if clean_base.startswith(prefix) and len(clean_base) > len(prefix):
                         clean_base = clean_base[len(prefix):]
                         break
 
-                market_cap = mc_map.get(sym, mc_map.get(base, mc_map.get(clean_base, 0)))
+                ALIASES = {'LUNA2': 'LUNA', 'DODOX': 'DODO'}
+                alt_base = ALIASES.get(base, ALIASES.get(clean_base, ''))
+                market_cap = mc_map.get(base, mc_map.get(clean_base, mc_map.get(alt_base, mc_map.get(sym, 0))))
                 funding_rate = fr_map.get(sym, 0.0)
 
                 green_count = sum(1 for tf in ['1d', '1w', '2w', '1m', '3m', '6m'] if tf_data[tf]['pct'] > 0)
