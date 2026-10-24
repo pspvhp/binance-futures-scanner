@@ -414,18 +414,17 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Binance Futures Scanner | CryptoRank Screener Style</title>
+    <title>Binance Futures Scanner</title>
     <style>
         :root {
             --bg: #0b0e14;
             --surface: #121721;
             --surface-hover: #19202e;
             --border: #222b3d;
-            --border-active: #3b82f6;
+            --border-focus: #3b82f6;
             --text: #eaecef;
             --text-dim: #848e9c;
             --accent: #2563eb;
-            --accent-light: rgba(37, 99, 235, 0.15);
             --green: #0ecb81;
             --green-bg: rgba(14, 203, 129, 0.12);
             --red: #f6465d;
@@ -433,7 +432,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             --yellow: #f0b90b;
             --yellow-bg: rgba(240, 185, 11, 0.15);
             --purple: #b388ff;
-            --purple-bg: rgba(179, 136, 255, 0.12);
             --orange: #ff9800;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -447,7 +445,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .utc-badge { background: #2563eb25; color: #60a5fa; border: 1px solid #2563eb55; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; }
         .header-meta { font-size: 11.5px; color: var(--text-dim); }
 
-        /* CRYPTORANK MARKET STATS STRIP */
+        /* MARKET STATS STRIP */
         .stats-grid { display: flex; overflow-x: auto; gap: 8px; margin-bottom: 12px; padding-bottom: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
         .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; min-width: 130px; flex: 1 0 auto; scroll-snap-align: start; }
         .stat-label { color: var(--text-dim); font-size: 11px; margin-bottom: 2px; }
@@ -458,112 +456,163 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .stat-value.orange { color: var(--orange); }
         .stat-sub { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
 
-        /* ================= CRYPTORANK FILTER DECK ================= */
-        .cr-filter-deck {
+        /* ================= FILTER PANEL ================= */
+        .filter-panel {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 10px 12px;
-            margin-bottom: 12px;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         }
-        .cr-chips-scroll {
+        .filter-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dim);
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
+            justify-content: space-between;
         }
-        .cr-chips-scroll::-webkit-scrollbar { display: none; }
 
-        /* DROPDOWN WRAPPER & CHIPS */
-        .cr-dropdown-wrap { position: relative; display: inline-block; }
-        .cr-chip {
+        .filter-grid-top {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        /* BUTTON GROUPS */
+        .pill-group { display: flex; gap: 5px; flex-wrap: wrap; }
+        .pill-btn {
             background: #18202d;
             border: 1px solid var(--border);
             color: var(--text);
-            padding: 7px 12px;
-            border-radius: 20px;
+            padding: 6px 11px;
+            border-radius: 6px;
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
+            user-select: none;
+            transition: all 0.15s;
+            min-height: 32px;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-            transition: all 0.15s;
-            user-select: none;
+            justify-content: center;
+        }
+        .pill-btn:hover { background: #232c40; color: #fff; border-color: #3e4c6b; }
+        .pill-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+        .cond-btn.active.cond-above { background: var(--green); border-color: var(--green); color: #000; }
+        .cond-btn.active.cond-below { background: var(--red); border-color: var(--red); color: #fff; }
+        .cond-btn.active.cond-all { background: var(--yellow); border-color: var(--yellow); color: #000; }
+
+        .filter-select {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: #18202d;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            width: 100%;
+            cursor: pointer;
             min-height: 34px;
         }
-        .cr-chip:hover { background: #222c3d; border-color: #3b4b66; color: #fff; }
-        .cr-chip.active-chip { background: var(--accent-light); border-color: var(--border-active); color: #93c5fd; font-weight: 700; }
-        .cr-arrow { font-size: 10px; color: var(--text-dim); transition: transform 0.2s; }
-        .cr-chip.open .cr-arrow { transform: rotate(180deg); }
+        .filter-select:focus { border-color: var(--border-focus); }
 
-        /* CRYPTORANK POPOVER CARD */
-        .cr-popover {
-            position: absolute;
-            top: calc(100% + 6px);
-            left: 0;
-            background: #141a24;
-            border: 1px solid #2d384e;
-            border-radius: 10px;
-            padding: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            z-index: 1000;
-            display: none;
-            min-width: 220px;
-            animation: fadeIn 0.15s ease-out;
+        .input-row { display: flex; gap: 6px; align-items: center; }
+        .input-field {
+            flex: 1;
+            padding: 6px 9px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: #18202d;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            min-height: 32px;
         }
-        .cr-popover.show { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+        .input-field:focus { border-color: var(--border-focus); }
 
-        .cr-popover-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 6px; }
-        .cr-popover-title { font-size: 11.5px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .cr-popover-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 6px; }
-        .cr-preset-btn { background: #19202e; border: 1px solid var(--border); color: var(--text); padding: 7px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; }
-        .cr-preset-btn:hover { background: #232c40; color: #fff; }
-        .cr-preset-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+        .preset-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
+        .preset-chip {
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: #18202d;
+            color: var(--text-dim);
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .preset-chip:hover { color: #fff; border-color: #3e4c6b; }
 
-        .cr-popover-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
-        .cr-list-btn { background: transparent; border: none; color: var(--text); padding: 7px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; text-align: left; display: flex; align-items: center; justify-content: space-between; }
-        .cr-list-btn:hover { background: #1d2535; color: #fff; }
-        .cr-list-btn.active { background: var(--accent-light); color: #93c5fd; font-weight: 700; }
+        /* PERCENT RANGE INPUTS GRID */
+        .pct-section {
+            border-top: 1px dashed rgba(255,255,255,0.08);
+            padding-top: 10px;
+            margin-top: 8px;
+        }
+        .pct-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .pct-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #18202d;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+        .pct-label { font-size: 11px; font-weight: 700; color: #fff; min-width: 60px; }
+        .pct-box {
+            width: 52px;
+            padding: 4px 5px;
+            font-size: 12.5px;
+            min-height: 28px;
+            text-align: center;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: #111620;
+            color: #fff;
+            outline: none;
+        }
+        .pct-box:focus { border-color: var(--border-focus); }
 
-        .cr-inputs-row { display: flex; gap: 6px; align-items: center; margin-top: 6px; margin-bottom: 8px; }
-        .cr-input { flex: 1; padding: 7px 9px; border-radius: 6px; border: 1px solid var(--border); background: #18202d; color: #fff; font-size: 13px; outline: none; }
-        .cr-input:focus { border-color: var(--border-active); }
+        /* ACTIONS BAR */
+        .filter-action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .btn-reset {
+            background: transparent;
+            border: 1px dashed var(--border);
+            color: var(--text-dim);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-reset:hover { color: var(--yellow); border-color: var(--yellow); }
 
-        .cr-presets-row { display: flex; gap: 5px; flex-wrap: wrap; }
-        .cr-preset-tag { padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); background: #18202d; color: var(--text-dim); font-size: 11px; cursor: pointer; }
-        .cr-preset-tag:hover { color: #fff; border-color: #3e4c6b; }
-
-        /* RANGES GRID */
-        .cr-ranges-grid { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
-        .cr-range-row { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
-        .cr-range-label { font-size: 11.5px; font-weight: 600; color: #fff; min-width: 72px; }
-        .cr-input-sm { width: 70px; padding: 5px 6px; font-size: 12px; text-align: center; border-radius: 6px; border: 1px solid var(--border); background: #18202d; color: #fff; outline: none; }
-        .cr-input-sm:focus { border-color: var(--border-active); }
-
-        .cr-link-btn { background: transparent; border: none; color: var(--yellow); font-size: 11px; cursor: pointer; font-weight: 600; }
-
-        .cr-reset-all { background: transparent; border: 1px dashed var(--border); color: var(--text-dim); padding: 7px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; margin-left: auto; }
-        .cr-reset-all:hover { color: var(--yellow); border-color: var(--yellow); }
-
-        /* ACTIVE FILTER TAGS ROW */
-        .cr-active-tags-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); min-height: 28px; }
-        .cr-tag { background: #1e2638; border: 1px solid #32405d; color: #cbd5e1; border-radius: 14px; padding: 2px 8px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
-        .cr-tag-remove { cursor: pointer; color: var(--text-dim); font-size: 12px; line-height: 1; }
-        .cr-tag-remove:hover { color: #f87171; }
-
-        /* CONTROLS & ACTIONS */
+        /* CONTROLS */
         .controls { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
         .controls-left { display: flex; gap: 8px; align-items: center; flex: 1; min-width: 200px; }
         .search-box { flex: 1; padding: 8px 11px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: #fff; font-size: 13.5px; outline: none; min-height: 36px; }
-        .search-box:focus { border-color: var(--border-active); }
+        .search-box:focus { border-color: var(--border-focus); }
 
         .view-switch { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 2px; }
         .view-btn { padding: 5px 10px; border-radius: 4px; border: none; background: transparent; color: var(--text-dim); font-size: 11.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
@@ -571,56 +620,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
         .btn-export { background: #18202d; border: 1px solid var(--border); color: var(--text); padding: 7px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
         .btn-export:hover { background: #232c40; color: #fff; }
-
-        /* TOKEN INFO (i) BADGE */
-        .info-btn {
-            background: #1e2638;
-            color: #60a5fa;
-            border: 1px solid #2d3d5c;
-            border-radius: 50%;
-            width: 17px;
-            height: 17px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 700;
-            font-style: italic;
-            cursor: pointer;
-            margin-left: 4px;
-            transition: all 0.15s;
-            user-select: none;
-            vertical-align: middle;
-            padding: 0;
-            line-height: 1;
-        }
-        .info-btn:hover {
-            background: #2563eb;
-            color: #fff;
-            border-color: #3b82f6;
-            transform: scale(1.15);
-        }
-
-        /* FLOATING HOVER / HOLD AI SUMMARY TOOLTIP */
-        .cr-info-tooltip {
-            position: fixed;
-            z-index: 99999;
-            display: none;
-            width: 290px;
-            background: #141a24;
-            border: 1px solid #334155;
-            border-radius: 10px;
-            padding: 11px 13px;
-            box-shadow: 0 12px 35px rgba(0,0,0,0.85);
-            pointer-events: none;
-            animation: ttFade 0.15s ease-out;
-        }
-        @keyframes ttFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        .tt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .tt-sym { font-size: 15px; font-weight: 700; color: #fff; }
-        .tt-tag { background: rgba(37, 99, 235, 0.18); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); padding: 2px 7px; border-radius: 4px; font-size: 10.5px; font-weight: 700; }
-        .tt-desc { font-size: 12px; color: #cbd5e1; line-height: 1.45; margin-bottom: 8px; }
-        .tt-footer { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px; }
 
         /* BADGES */
         .pill-tag { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
@@ -675,7 +674,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         .tf-tile { background: #18202d; border-radius: 5px; padding: 4px 2px; text-align: center; border: 1px solid var(--border); }
         .tf-tile-name { font-size: 9px; color: var(--text-dim); font-weight: 700; margin-bottom: 1px; }
         .tf-tile-val { font-size: 11px; font-weight: 700; white-space: nowrap; }
-        .tf-tile.highlight { border-color: var(--border-active); box-shadow: 0 0 5px rgba(59, 130, 246, 0.4); }
+        .tf-tile.highlight { border-color: var(--border-focus); box-shadow: 0 0 5px rgba(59, 130, 246, 0.4); }
 
         /* TABLE VIEW */
         .table-container { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -692,110 +691,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         th.col-sticky-1, td.col-sticky-1 { position: sticky; left: 0; z-index: 3; background: #121721; width: 30px; text-align: center; }
         th.col-sticky-2, td.col-sticky-2 { position: sticky; left: 30px; z-index: 3; background: #121721; box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
         th.col-sticky-1, th.col-sticky-2 { background: #161c27; z-index: 4; }
-
-        /* TOKEN QUICK INFO MODAL OVERLAY */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-            z-index: 10000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 14px;
-        }
-        .modal-overlay.show { display: flex; }
-        .modal-card {
-            background: #141a24;
-            border: 1px solid #2d384e;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 440px;
-            box-shadow: 0 20px 45px rgba(0,0,0,0.75);
-            overflow: hidden;
-            animation: modalFade 0.18s ease-out;
-        }
-        @keyframes modalFade { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border);
-            background: #10151f;
-        }
-        .modal-title-group { display: flex; align-items: center; gap: 8px; }
-        .modal-symbol { font-size: 18px; font-weight: 700; color: #fff; }
-        .modal-close {
-            background: #1e2638;
-            border: 1px solid var(--border);
-            color: var(--text-dim);
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        .modal-close:hover { color: #fff; background: #2b364e; }
-
-        .modal-body { padding: 14px 16px; max-height: 80vh; overflow-y: auto; }
-        
-        .modal-stats-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-        .modal-stat-box {
-            background: #18202d;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 9px 12px;
-        }
-        .modal-stat-label { font-size: 11px; color: var(--text-dim); margin-bottom: 2px; }
-        .modal-stat-val { font-size: 15px; font-weight: 700; color: #fff; }
-
-        .modal-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-            margin-bottom: 14px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .modal-table th { background: #18202d; padding: 7px 10px; color: var(--text-dim); font-size: 11px; font-weight: 600; text-align: left; }
-        .modal-table td { padding: 8px 10px; border-top: 1px solid var(--border); }
-
-        .modal-links-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .modal-link-btn {
-            flex: 1;
-            min-width: 100px;
-            text-align: center;
-            background: #18202d;
-            border: 1px solid var(--border);
-            color: #93c5fd;
-            text-decoration: none;
-            padding: 8px 10px;
-            border-radius: 6px;
-            font-size: 11.5px;
-            font-weight: 600;
-            transition: all 0.15s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-        }
-        .modal-link-btn:hover { background: #2563eb; color: #fff; border-color: #2563eb; }
 
         /* FAB */
         .fab-rescan {
@@ -828,10 +723,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         @media (max-width: 768px) {
             body { padding: 10px 8px 80px 8px; }
             .header h1 { font-size: 16px; }
-            .search-box, .cr-input { font-size: 16px !important; }
+            .search-box, .filter-select, .input-field { font-size: 16px !important; }
             .tf-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
-            .cr-popover { position: fixed; top: auto; bottom: 0; left: 0; right: 0; width: 100%; border-radius: 16px 16px 0 0; border: 1px solid #334155; padding: 16px; z-index: 10000; max-height: 80vh; overflow-y: auto; }
-            .cr-info-tooltip { width: 260px; }
+            .pct-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .pct-box { width: 44px; font-size: 14px !important; }
         }
     </style>
 </head>
@@ -873,172 +768,137 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- ================= CRYPTORANK STYLE FILTER DECK ================= -->
-    <div class="cr-filter-deck">
-        <div class="cr-chips-scroll">
-            <!-- 1. Timeframe Chip -->
-            <div class="cr-dropdown-wrap">
-                <button class="cr-chip active-chip" id="btnChipTf" onclick="togglePopover('pop_tf')">
-                    <span>⏱️ Timeframe: <b id="chipTfText">1W</b></span>
-                    <span class="cr-arrow">▾</span>
-                </button>
-                <div class="cr-popover" id="pop_tf">
-                    <div class="cr-popover-title">Focus Timeframe (UTC 00:00)</div>
-                    <div class="cr-popover-grid">
-                        <button class="cr-preset-btn" data-tf="1d" onclick="selectTf('1d')">1D (Daily)</button>
-                        <button class="cr-preset-btn active" data-tf="1w" onclick="selectTf('1w')">1W (Weekly)</button>
-                        <button class="cr-preset-btn" data-tf="2w" onclick="selectTf('2w')">2W (14 Days)</button>
-                        <button class="cr-preset-btn" data-tf="1m" onclick="selectTf('1m')">1M (Monthly)</button>
-                        <button class="cr-preset-btn" data-tf="3m" onclick="selectTf('3m')">3M (Quarter)</button>
-                        <button class="cr-preset-btn" data-tf="6m" onclick="selectTf('6m')">6M (Semi-annual)</button>
-                    </div>
+    <!-- ================= DIRECT WORKING FILTER PANEL ================= -->
+    <div class="filter-panel">
+        <div class="filter-grid-top">
+            <!-- 1. Timeframe Selection -->
+            <div>
+                <div class="filter-section-title">⏱️ 1. Focus Timeframe (UTC)</div>
+                <div class="pill-group" id="tfGroup">
+                    <button class="pill-btn" data-tf="1d" onclick="selectTf('1d')">1D</button>
+                    <button class="pill-btn active" data-tf="1w" onclick="selectTf('1w')">1W</button>
+                    <button class="pill-btn" data-tf="2w" onclick="selectTf('2w')">2W</button>
+                    <button class="pill-btn" data-tf="1m" onclick="selectTf('1m')">1M</button>
+                    <button class="pill-btn" data-tf="3m" onclick="selectTf('3m')">3M</button>
+                    <button class="pill-btn" data-tf="6m" onclick="selectTf('6m')">6M</button>
                 </div>
             </div>
 
-            <!-- 2. Position Condition Chip -->
-            <div class="cr-dropdown-wrap">
-                <button class="cr-chip active-chip" id="btnChipCond" onclick="togglePopover('pop_cond')">
-                    <span id="chipCondText">🟢 > Open</span>
-                    <span class="cr-arrow">▾</span>
-                </button>
-                <div class="cr-popover" id="pop_cond">
-                    <div class="cr-popover-title">Position vs Open Price</div>
-                    <div class="cr-popover-list">
-                        <button class="cr-list-btn active" data-cond="above" onclick="selectCond('above')">🟢 Above Open (Bull)</button>
-                        <button class="cr-list-btn" data-cond="below" onclick="selectCond('below')">🔴 Below Open (Bear)</button>
-                        <button class="cr-list-btn" data-cond="all" onclick="selectCond('all')">⚪ All Positions</button>
-                    </div>
+            <!-- 2. Position Condition -->
+            <div>
+                <div class="filter-section-title">🎯 2. Price Position</div>
+                <div class="pill-group" id="condGroup">
+                    <button class="pill-btn cond-btn active cond-above" data-cond="above" onclick="selectCond('above')">🟢 > Open</button>
+                    <button class="pill-btn cond-btn cond-below" data-cond="below" onclick="selectCond('below')">🔴 < Open</button>
+                    <button class="pill-btn cond-btn cond-all" data-cond="all" onclick="selectCond('all')">⚪ All</button>
                 </div>
             </div>
 
-            <!-- 3. Market Cap Chip -->
-            <div class="cr-dropdown-wrap">
-                <button class="cr-chip" id="btnChipMc" onclick="togglePopover('pop_mc')">
-                    <span id="chipMcText">💎 Market Cap</span>
-                    <span class="cr-arrow">▾</span>
-                </button>
-                <div class="cr-popover" id="pop_mc" style="min-width: 270px;">
-                    <div class="cr-popover-title">Market Cap Range (USD)</div>
-                    <div class="cr-inputs-row">
-                        <input type="text" id="minMcInput" class="cr-input" placeholder="Min (50M)" oninput="onMcChange()">
-                        <span style="color:var(--text-dim);">-</span>
-                        <input type="text" id="maxMcInput" class="cr-input" placeholder="Max (1B)" oninput="onMcChange()">
-                    </div>
-                    <div class="cr-presets-row">
-                        <button class="cr-preset-tag" onclick="setMcPreset(0, 0)">All</button>
-                        <button class="cr-preset-tag" onclick="setMcPreset(0, 50e6)">&lt;$50M</button>
-                        <button class="cr-preset-tag" onclick="setMcPreset(50e6, 300e6)">$50M-$300M</button>
-                        <button class="cr-preset-tag" onclick="setMcPreset(300e6, 1e9)">$300M-$1B</button>
-                        <button class="cr-preset-tag" onclick="setMcPreset(1e9, 0)">&gt;$1B</button>
-                    </div>
+            <!-- 3. Market Cap (Type numbers freely) -->
+            <div>
+                <div class="filter-section-title">
+                    <span>💎 3. Market Cap (USD)</span>
+                    <span style="color:#b388ff; font-size:11px;" id="mcLabel">All</span>
+                </div>
+                <div class="input-row">
+                    <input type="text" id="minMcInput" class="input-field" placeholder="Min (e.g. 50M)" oninput="onFilterChange()">
+                    <span style="color:var(--text-dim);">-</span>
+                    <input type="text" id="maxMcInput" class="input-field" placeholder="Max (e.g. 1B)" oninput="onFilterChange()">
+                </div>
+                <div class="preset-row">
+                    <span class="preset-chip" onclick="setMcPreset(0, 0)">All</span>
+                    <span class="preset-chip" onclick="setMcPreset(0, 50e6)">&lt;50M</span>
+                    <span class="preset-chip" onclick="setMcPreset(50e6, 300e6)">50M-300M</span>
+                    <span class="preset-chip" onclick="setMcPreset(300e6, 1e9)">300M-1B</span>
+                    <span class="preset-chip" onclick="setMcPreset(1e9, 0)">&gt;1B</span>
                 </div>
             </div>
 
-            <!-- 4. Funding Rate Chip -->
-            <div class="cr-dropdown-wrap">
-                <button class="cr-chip" id="btnChipFr" onclick="togglePopover('pop_fr')">
-                    <span id="chipFrText">⚡ Funding Rate</span>
-                    <span class="cr-arrow">▾</span>
-                </button>
-                <div class="cr-popover" id="pop_fr">
-                    <div class="cr-popover-title">Binance Funding Rate</div>
-                    <div class="cr-popover-list">
-                        <button class="cr-list-btn active" data-fr="all" onclick="selectFr('all')">All Funding Rates</button>
-                        <button class="cr-list-btn" data-fr="neg" onclick="selectFr('neg')">🔥 Negative FR (&lt;0%)</button>
-                        <button class="cr-list-btn" data-fr="neg_deep" onclick="selectFr('neg_deep')">⚠️ Deep Neg (&lt;-0.05%) Squeeze</button>
-                        <button class="cr-list-btn" data-fr="pos" onclick="selectFr('pos')">📈 Positive FR (&gt;0%)</button>
-                        <button class="cr-list-btn" data-fr="pos_high" onclick="selectFr('pos_high')">⚡ High Positive (&gt;0.03%)</button>
-                    </div>
+            <!-- 4. Funding Rate & Volume -->
+            <div>
+                <div class="filter-section-title">⚡ 4. Funding & 24h Vol</div>
+                <div style="display:flex; gap:6px;">
+                    <select id="frSelect" class="filter-select" onchange="onFilterChange()" style="flex:1;">
+                        <option value="all">All Funding</option>
+                        <option value="neg">🔥 Neg FR (&lt;0%)</option>
+                        <option value="neg_deep">⚠️ Deep Neg (&lt;-0.05%)</option>
+                        <option value="pos">📈 Pos FR (&gt;0%)</option>
+                        <option value="pos_high">⚡ High Pos (&gt;0.03%)</option>
+                    </select>
+                    <select id="minVolSelect" class="filter-select" onchange="onFilterChange()" style="flex:1;">
+                        <option value="0">All Vol</option>
+                        <option value="1000000">&gt;$1M</option>
+                        <option value="5000000">&gt;$5M</option>
+                        <option value="20000000">&gt;$20M</option>
+                    </select>
                 </div>
             </div>
-
-            <!-- 5. 24h Volume Chip -->
-            <div class="cr-dropdown-wrap">
-                <button class="cr-chip" id="btnChipVol" onclick="togglePopover('pop_vol')">
-                    <span id="chipVolText">📊 24h Volume</span>
-                    <span class="cr-arrow">▾</span>
-                </button>
-                <div class="cr-popover" id="pop_vol">
-                    <div class="cr-popover-title">24h Trading Volume</div>
-                    <div class="cr-popover-list">
-                        <button class="cr-list-btn active" data-vol="0" onclick="selectVol(0)">All Volumes</button>
-                        <button class="cr-list-btn" data-vol="1000000" onclick="selectVol(1000000)">&gt; $1M Volume</button>
-                        <button class="cr-list-btn" data-vol="5000000" onclick="selectVol(5000000)">&gt; $5M Volume</button>
-                        <button class="cr-list-btn" data-vol="20000000" onclick="selectVol(20000000)">&gt; $20M Volume</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 6. Custom % Ranges Chip -->
-            <div class="cr-dropdown-wrap">
-                <button class="cr-chip" id="btnChipRanges" onclick="togglePopover('pop_ranges')">
-                    <span id="chipRangesText">📈 % Performance</span>
-                    <span class="cr-arrow">▾</span>
-                </button>
-                <div class="cr-popover" id="pop_ranges" style="min-width: 300px;">
-                    <div class="cr-popover-header">
-                        <div class="cr-popover-title">Performance % Filters</div>
-                        <button class="cr-link-btn" onclick="resetRangeFilters()">Reset</button>
-                    </div>
-                    <div class="cr-ranges-grid">
-                        <div class="cr-range-row">
-                            <span class="cr-range-label" id="crDevLabel">Dev. %</span>
-                            <input type="number" step="any" id="min_dev_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
-                            <span>-</span>
-                            <input type="number" step="any" id="max_dev_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
-                        </div>
-                        <div class="cr-range-row">
-                            <span class="cr-range-label">1D (24h)</span>
-                            <input type="number" step="any" id="min_1d_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
-                            <span>-</span>
-                            <input type="number" step="any" id="max_1d_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
-                        </div>
-                        <div class="cr-range-row">
-                            <span class="cr-range-label">1W (7d)</span>
-                            <input type="number" step="any" id="min_1w_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
-                            <span>-</span>
-                            <input type="number" step="any" id="max_1w_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
-                        </div>
-                        <div class="cr-range-row">
-                            <span class="cr-range-label">2W (14d)</span>
-                            <input type="number" step="any" id="min_2w_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
-                            <span>-</span>
-                            <input type="number" step="any" id="max_2w_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
-                        </div>
-                        <div class="cr-range-row">
-                            <span class="cr-range-label">1M (30d)</span>
-                            <input type="number" step="any" id="min_1m_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
-                            <span>-</span>
-                            <input type="number" step="any" id="max_1m_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
-                        </div>
-                        <div class="cr-range-row">
-                            <span class="cr-range-label">3M</span>
-                            <input type="number" step="any" id="min_3m_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
-                            <span>-</span>
-                            <input type="number" step="any" id="max_3m_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
-                        </div>
-                        <div class="cr-range-row">
-                            <span class="cr-range-label">6M</span>
-                            <input type="number" step="any" id="min_6m_input" class="cr-input-sm" placeholder="Min" oninput="onRangeChange()">
-                            <span>-</span>
-                            <input type="number" step="any" id="max_6m_input" class="cr-input-sm" placeholder="Max" oninput="onRangeChange()">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Reset All -->
-            <button class="cr-reset-all" onclick="resetAllFilters()">↺ Reset All</button>
         </div>
 
-        <!-- ACTIVE FILTER TAGS ROW -->
-        <div class="cr-active-tags-row" id="crActiveTags"></div>
+        <!-- 5. Custom % Performance Ranges (Type numbers freely) -->
+        <div class="pct-section">
+            <div class="filter-section-title">
+                <span>📊 5. Type Custom % Ranges (Min % to Max %)</span>
+                <span style="font-size:11px; color:var(--text-dim);">Live real-time filtering</span>
+            </div>
+            <div class="pct-grid">
+                <div class="pct-item">
+                    <span class="pct-label" id="pctDevLabel">Dev. %</span>
+                    <input type="number" step="any" id="min_dev_input" class="pct-box" placeholder="Min" oninput="onFilterChange()">
+                    <span style="color:var(--text-dim);">-</span>
+                    <input type="number" step="any" id="max_dev_input" class="pct-box" placeholder="Max" oninput="onFilterChange()">
+                </div>
+                <div class="pct-item">
+                    <span class="pct-label">1D %</span>
+                    <input type="number" step="any" id="min_1d_input" class="pct-box" placeholder="Min" oninput="onFilterChange()">
+                    <span style="color:var(--text-dim);">-</span>
+                    <input type="number" step="any" id="max_1d_input" class="pct-box" placeholder="Max" oninput="onFilterChange()">
+                </div>
+                <div class="pct-item">
+                    <span class="pct-label">1W (7d) %</span>
+                    <input type="number" step="any" id="min_1w_input" class="pct-box" placeholder="Min" oninput="onFilterChange()">
+                    <span style="color:var(--text-dim);">-</span>
+                    <input type="number" step="any" id="max_1w_input" class="pct-box" placeholder="Max" oninput="onFilterChange()">
+                </div>
+                <div class="pct-item">
+                    <span class="pct-label">2W (14d) %</span>
+                    <input type="number" step="any" id="min_2w_input" class="pct-box" placeholder="Min" oninput="onFilterChange()">
+                    <span style="color:var(--text-dim);">-</span>
+                    <input type="number" step="any" id="max_2w_input" class="pct-box" placeholder="Max" oninput="onFilterChange()">
+                </div>
+                <div class="pct-item">
+                    <span class="pct-label">1M (30d) %</span>
+                    <input type="number" step="any" id="min_1m_input" class="pct-box" placeholder="Min" oninput="onFilterChange()">
+                    <span style="color:var(--text-dim);">-</span>
+                    <input type="number" step="any" id="max_1m_input" class="pct-box" placeholder="Max" oninput="onFilterChange()">
+                </div>
+                <div class="pct-item">
+                    <span class="pct-label">3M %</span>
+                    <input type="number" step="any" id="min_3m_input" class="pct-box" placeholder="Min" oninput="onFilterChange()">
+                    <span style="color:var(--text-dim);">-</span>
+                    <input type="number" step="any" id="max_3m_input" class="pct-box" placeholder="Max" oninput="onFilterChange()">
+                </div>
+                <div class="pct-item">
+                    <span class="pct-label">6M %</span>
+                    <input type="number" step="any" id="min_6m_input" class="pct-box" placeholder="Min" oninput="onFilterChange()">
+                    <span style="color:var(--text-dim);">-</span>
+                    <input type="number" step="any" id="max_6m_input" class="pct-box" placeholder="Max" oninput="onFilterChange()">
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-action-bar">
+            <button class="btn-reset" onclick="resetAllFilters()">↺ Reset All Filters</button>
+            <div style="font-size:12px; color:var(--text-dim);" id="filterStatusText">
+                Filtering by: <b>1W | > Open</b>
+            </div>
+        </div>
     </div>
 
     <!-- CONTROLS -->
     <div class="controls">
         <div class="controls-left">
-            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search token (BTC, SOL, SUI, PEPE...)" oninput="renderView()">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search token (BTC, SOL, SUI, PEPE...)" oninput="onFilterChange()">
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
             <button class="btn-export" onclick="exportCSV()">📥 CSV</button>
@@ -1087,218 +947,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         </table>
     </div>
 
-    <!-- FLOATING HOVER / HOLD AI SUMMARY TOOLTIP -->
-    <div id="infoTooltipFloating" class="cr-info-tooltip">
-        <div class="tt-header">
-            <span class="tt-sym" id="ttSymbol">BTC</span>
-            <span class="tt-tag" id="ttCategory">Layer 1</span>
-        </div>
-        <div class="tt-desc" id="ttDesc">Original cryptocurrency, digital gold and benchmark PoW Layer 1 network.</div>
-        <div class="tt-footer">
-            <span id="ttPrice" style="font-weight:700; color:#fff;">$0.00</span>
-            <span id="ttCap" style="color:#b388ff;">-</span>
-            <span id="ttFr">-</span>
-        </div>
-    </div>
-
-    <!-- TOKEN QUICK INFO MODAL OVERLAY -->
-    <div class="modal-overlay" id="tokenModalOverlay" onclick="closeTokenModal(event)">
-        <div class="modal-card" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <div class="modal-title-group">
-                    <span class="modal-symbol" id="mSymbol">BTC</span>
-                    <span style="font-size:12px; color:var(--text-dim);">USDT-M Perpetual</span>
-                    <span id="mTrendBadge"></span>
-                </div>
-                <button class="modal-close" onclick="closeTokenModal()">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="modal-stats-row">
-                    <div class="modal-stat-box">
-                        <div class="modal-stat-label">Current Price</div>
-                        <div class="modal-stat-val" id="mPrice">$0.00</div>
-                    </div>
-                    <div class="modal-stat-box">
-                        <div class="modal-stat-label">Market Cap</div>
-                        <div class="modal-stat-val" id="mCap" style="color:#b388ff;">-</div>
-                    </div>
-                    <div class="modal-stat-box">
-                        <div class="modal-stat-label">24h Volume</div>
-                        <div class="modal-stat-val" id="mVol">$0</div>
-                    </div>
-                    <div class="modal-stat-box">
-                        <div class="modal-stat-label">Funding Rate</div>
-                        <div class="modal-stat-val" id="mFr">-</div>
-                    </div>
-                </div>
-
-                <div style="font-size:11.5px; font-weight:700; color:var(--text-dim); text-transform:uppercase; margin-bottom:6px;">
-                    Multi-Timeframe UTC 00:00 Open Benchmarks
-                </div>
-                <table class="modal-table">
-                    <thead>
-                        <tr>
-                            <th>Timeframe</th>
-                            <th>Open Price</th>
-                            <th>Deviation (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="mTableBody"></tbody>
-                </table>
-
-                <div class="modal-links-row">
-                    <a id="mLinkBinance" href="#" target="_blank" class="modal-link-btn">
-                        <span>📊 Binance Chart</span> ↗
-                    </a>
-                    <a id="mLinkTv" href="#" target="_blank" class="modal-link-btn">
-                        <span>📈 TradingView</span> ↗
-                    </a>
-                    <a id="mLinkCmc" href="#" target="_blank" class="modal-link-btn">
-                        <span>💎 CoinMarketCap</span> ↗
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- FAB RESCAN -->
     <button class="fab-rescan" onclick="fetchScan(true)">
         🔄 <span>Rescan</span>
     </button>
 
     <script>
-        // SMART AUTO-DETECTION: Mobile vs Desktop
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth <= 768);
         
         let currentFilterTf = '1w';
         let currentFilterCond = 'above';
-        let currentFilterFr = 'all';
-        let currentFilterVol = 0;
         let allTokens = [];
         let currentSort = { col: 'diff_pct', dir: 'desc' };
         let currentView = isMobile ? 'cards' : 'table';
-        let tooltipHideTimer = null;
-
-        // Close popovers on click outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.cr-dropdown-wrap')) {
-                closeAllPopovers();
-            }
-        });
-
-        // ESC key to close modal
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeTokenModal();
-                closeAllPopovers();
-            }
-        });
-
-        /* FLOATING HOVER / HOLD AI SUMMARY TOOLTIP */
-        function showInfoTooltip(e, sym) {
-            if (tooltipHideTimer) clearTimeout(tooltipHideTimer);
-            const t = allTokens.find(x => x.symbol === sym);
-            if (!t) return;
-
-            const el = document.getElementById('infoTooltipFloating');
-            document.getElementById('ttSymbol').innerText = t.base;
-            document.getElementById('ttCategory').innerText = t.category || 'Crypto Asset';
-            document.getElementById('ttDesc').innerText = t.summary || `${t.base} is a token traded on Binance Futures.`;
-            document.getElementById('ttPrice').innerText = '$' + formatNumber(t.current_price);
-            document.getElementById('ttCap').innerHTML = 'MC: ' + formatMarketCap(t.market_cap);
-            document.getElementById('ttFr').innerHTML = 'FR: ' + getFundingBadge(t.funding_rate);
-
-            el.style.display = 'block';
-
-            const rect = e.currentTarget.getBoundingClientRect();
-            let left = rect.left + rect.width / 2 - 145;
-            let top = rect.top - el.offsetHeight - 8;
-
-            if (left < 10) left = 10;
-            if (left + 300 > window.innerWidth) left = window.innerWidth - 305;
-            if (top < 10) top = rect.bottom + 8; // flip below if crowded above
-
-            el.style.left = left + 'px';
-            el.style.top = top + 'px';
-        }
-
-        function hideInfoTooltip() {
-            tooltipHideTimer = setTimeout(() => {
-                const el = document.getElementById('infoTooltipFloating');
-                if (el) el.style.display = 'none';
-            }, 60);
-        }
-
-        function closeAllPopovers() {
-            document.querySelectorAll('.cr-popover').forEach(p => p.classList.remove('show'));
-            document.querySelectorAll('.cr-chip').forEach(c => c.classList.remove('open'));
-        }
-
-        function togglePopover(id) {
-            const el = document.getElementById(id);
-            const isOpen = el.classList.contains('show');
-            closeAllPopovers();
-            if (!isOpen) {
-                el.classList.add('show');
-                el.parentElement.querySelector('.cr-chip').classList.add('open');
-            }
-        }
-
-        /* TOKEN QUICK INFO MODAL POPUP */
-        function openTokenModal(sym) {
-            hideInfoTooltip();
-            const t = allTokens.find(x => x.symbol === sym);
-            if (!t) return;
-
-            document.getElementById('mSymbol').innerText = t.base;
-            document.getElementById('mPrice').innerText = '$' + formatNumber(t.current_price);
-            document.getElementById('mCap').innerHTML = formatMarketCap(t.market_cap);
-            document.getElementById('mVol').innerText = formatVolume(t.volume_24h);
-            document.getElementById('mFr').innerHTML = getFundingBadge(t.funding_rate);
-
-            let trendHtml = '';
-            if (t.green_count >= 5) trendHtml = `<span class="pill-tag green">🟢 Bullish (${t.green_count}/6)</span>`;
-            else if (t.green_count >= 3) trendHtml = `<span class="pill-tag yellow">🟡 Neutral (${t.green_count}/6)</span>`;
-            else trendHtml = `<span class="pill-tag red">🔴 Bearish (${t.green_count}/6)</span>`;
-            document.getElementById('mTrendBadge').innerHTML = trendHtml;
-
-            const tfs = [
-                { key: '1d', label: '1D (Today)' },
-                { key: '1w', label: '1W (Weekly)' },
-                { key: '2w', label: '2W (Bi-weekly)' },
-                { key: '1m', label: '1M (Monthly)' },
-                { key: '3m', label: '3M (Quarter)' },
-                { key: '6m', label: '6M (Semi-annual)' }
-            ];
-
-            const tbody = document.getElementById('mTableBody');
-            tbody.innerHTML = '';
-            tfs.forEach(item => {
-                const openVal = t[`open_${item.key}`];
-                const pct = t[`pct_${item.key}`];
-                const isGreen = pct >= 0;
-                const sign = isGreen ? '▲ +' : '▼ ';
-                const cls = isGreen ? 'text-green' : 'text-red';
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td style="font-weight:600; color:#fff;">${item.label}</td>
-                    <td style="color:var(--text-dim);">$${formatNumber(openVal)}</td>
-                    <td class="${cls}" style="font-weight:700;">${sign}${Math.abs(pct).toFixed(2)}%</td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            document.getElementById('mLinkBinance').href = `https://www.binance.com/en/futures/${t.symbol}`;
-            document.getElementById('mLinkTv').href = `https://www.tradingview.com/chart/?symbol=BINANCE:${t.symbol}.P`;
-            document.getElementById('mLinkCmc').href = `https://coinmarketcap.com/currencies/${t.base.toLowerCase()}/`;
-
-            document.getElementById('tokenModalOverlay').classList.add('show');
-        }
-
-        function closeTokenModal(e) {
-            if (e && e.target && e.target.closest('.modal-card')) return;
-            document.getElementById('tokenModalOverlay').classList.remove('show');
-        }
 
         function switchView(mode) {
             currentView = mode;
@@ -1352,194 +1013,65 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             return `<span style="color:var(--text-dim);">${sign}${fr.toFixed(4)}%</span>`;
         }
 
-        /* FILTER SELECTORS */
+        /* FILTER CONTROLS */
         function selectTf(tf) {
             currentFilterTf = tf;
-            document.querySelectorAll('#pop_tf .cr-preset-btn').forEach(b => {
+            document.querySelectorAll('#tfGroup .pill-btn').forEach(b => {
                 b.classList.toggle('active', b.getAttribute('data-tf') === tf);
             });
-            document.getElementById('chipTfText').innerText = tf.toUpperCase();
-            closeAllPopovers();
+            document.getElementById('th_open_active').innerText = `Open (${tf.toUpperCase()})`;
+            document.getElementById('th_diff_pct').innerText = `🔥 % Dev. (${tf.toUpperCase()}) ⬍`;
+            document.getElementById('pctDevLabel').innerText = `Dev. (${tf.toUpperCase()}) %`;
             updateStats();
-            renderView();
+            onFilterChange();
         }
 
         function selectCond(cond) {
             currentFilterCond = cond;
-            document.querySelectorAll('#pop_cond .cr-list-btn').forEach(b => {
+            document.querySelectorAll('#condGroup .pill-btn').forEach(b => {
                 b.classList.toggle('active', b.getAttribute('data-cond') === cond);
             });
-            const condLabels = { 'above': '🟢 > Open', 'below': '🔴 < Open', 'all': '⚪ All' };
-            document.getElementById('chipCondText').innerText = condLabels[cond];
-            closeAllPopovers();
-            renderView();
-        }
-
-        function selectFr(fr) {
-            currentFilterFr = fr;
-            document.querySelectorAll('#pop_fr .cr-list-btn').forEach(b => {
-                b.classList.toggle('active', b.getAttribute('data-fr') === fr);
-            });
-            const frBtn = document.getElementById('btnChipFr');
-            const frText = document.getElementById('chipFrText');
-            if (fr === 'all') {
-                frBtn.classList.remove('active-chip');
-                frText.innerText = '⚡ Funding Rate';
-            } else {
-                frBtn.classList.add('active-chip');
-                const labels = { 'neg': '🔥 Neg FR', 'neg_deep': '⚠️ Deep Neg', 'pos': '📈 Pos FR', 'pos_high': '⚡ High Pos' };
-                frText.innerText = `⚡ ${labels[fr]}`;
-            }
-            closeAllPopovers();
-            renderView();
-        }
-
-        function selectVol(vol) {
-            currentFilterVol = vol;
-            document.querySelectorAll('#pop_vol .cr-list-btn').forEach(b => {
-                b.classList.toggle('active', parseFloat(b.getAttribute('data-vol')) === vol);
-            });
-            const volBtn = document.getElementById('btnChipVol');
-            const volText = document.getElementById('chipVolText');
-            if (vol === 0) {
-                volBtn.classList.remove('active-chip');
-                volText.innerText = '📊 24h Volume';
-            } else {
-                volBtn.classList.add('active-chip');
-                volText.innerText = `📊 > ${formatVolume(vol)}`;
-            }
-            closeAllPopovers();
-            renderView();
+            onFilterChange();
         }
 
         function setMcPreset(minVal, maxVal) {
             document.getElementById('minMcInput').value = minVal > 0 ? (minVal >= 1e9 ? (minVal/1e9)+'B' : (minVal/1e6)+'M') : '';
             document.getElementById('maxMcInput').value = maxVal > 0 ? (maxVal >= 1e9 ? (maxVal/1e9)+'B' : (maxVal/1e6)+'M') : '';
-            onMcChange();
-            closeAllPopovers();
+            onFilterChange();
         }
 
-        function onMcChange() {
-            const minMc = parseAmount(document.getElementById('minMcInput').value);
-            const maxMc = parseAmount(document.getElementById('maxMcInput').value);
-            const chipBtn = document.getElementById('btnChipMc');
-            const chipText = document.getElementById('chipMcText');
-
-            if (!minMc && !maxMc) {
-                chipBtn.classList.remove('active-chip');
-                chipText.innerText = '💎 Market Cap';
-            } else {
-                chipBtn.classList.add('active-chip');
-                if (minMc && maxMc) chipText.innerText = `💎 MC: ${formatVolume(minMc)}-${formatVolume(maxMc)}`;
-                else if (minMc) chipText.innerText = `💎 MC: ≥${formatVolume(minMc)}`;
-                else chipText.innerText = `💎 MC: ≤${formatVolume(maxMc)}`;
-            }
-            renderView();
-        }
-
-        function onRangeChange() {
-            let activeCount = 0;
-            ['dev', '1d', '1w', '2w', '1m', '3m', '6m'].forEach(k => {
-                const minEl = document.getElementById(`min_${k}_input`);
-                const maxEl = document.getElementById(`max_${k}_input`);
-                if ((minEl && minEl.value !== '') || (maxEl && maxEl.value !== '')) activeCount++;
-            });
-
-            const chipBtn = document.getElementById('btnChipRanges');
-            const chipText = document.getElementById('chipRangesText');
-            if (activeCount > 0) {
-                chipBtn.classList.add('active-chip');
-                chipText.innerText = `📈 % Ranges (${activeCount})`;
-            } else {
-                chipBtn.classList.remove('active-chip');
-                chipText.innerText = '📈 % Performance';
-            }
-            renderView();
-        }
-
-        function resetRangeFilters() {
+        function resetAllFilters() {
+            currentFilterTf = '1w';
+            currentFilterCond = 'above';
+            document.querySelectorAll('#tfGroup .pill-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-tf') === '1w'));
+            document.querySelectorAll('#condGroup .pill-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-cond') === 'above'));
+            document.getElementById('minMcInput').value = '';
+            document.getElementById('maxMcInput').value = '';
+            document.getElementById('frSelect').value = 'all';
+            document.getElementById('minVolSelect').value = '0';
             ['dev', '1d', '1w', '2w', '1m', '3m', '6m'].forEach(k => {
                 const minEl = document.getElementById(`min_${k}_input`);
                 const maxEl = document.getElementById(`max_${k}_input`);
                 if (minEl) minEl.value = '';
                 if (maxEl) maxEl.value = '';
             });
-            onRangeChange();
-            closeAllPopovers();
-        }
-
-        function resetAllFilters() {
-            selectTf('1w');
-            selectCond('above');
-            selectFr('all');
-            selectVol(0);
-            setMcPreset(0, 0);
-            resetRangeFilters();
             document.getElementById('searchInput').value = '';
-            renderView();
+            onFilterChange();
         }
 
-        /* UPDATE ACTIVE FILTER TAGS */
-        function updateActiveTags() {
-            const container = document.getElementById('crActiveTags');
-            container.innerHTML = '';
-            const tags = [];
-
-            tags.push({ label: `Timeframe: ${currentFilterTf.toUpperCase()}`, onRemove: () => selectTf('1w') });
-
-            if (currentFilterCond !== 'all') {
-                const condLabel = currentFilterCond === 'above' ? 'Position: > Open' : 'Position: < Open';
-                tags.push({ label: condLabel, onRemove: () => selectCond('all') });
-            }
-
+        function onFilterChange() {
             const minMc = parseAmount(document.getElementById('minMcInput').value);
             const maxMc = parseAmount(document.getElementById('maxMcInput').value);
-            if (minMc || maxMc) {
-                let lbl = 'MCap';
-                if (minMc && maxMc) lbl = `MCap: ${formatVolume(minMc)} - ${formatVolume(maxMc)}`;
-                else if (minMc) lbl = `MCap ≥ ${formatVolume(minMc)}`;
-                else lbl = `MCap ≤ ${formatVolume(maxMc)}`;
-                tags.push({ label: lbl, onRemove: () => setMcPreset(0, 0) });
-            }
+            let mcStr = 'All';
+            if (minMc && maxMc) mcStr = `${formatVolume(minMc)} - ${formatVolume(maxMc)}`;
+            else if (minMc) mcStr = `≥ ${formatVolume(minMc)}`;
+            else if (maxMc) mcStr = `≤ ${formatVolume(maxMc)}`;
+            document.getElementById('mcLabel').innerText = mcStr;
 
-            if (currentFilterFr !== 'all') {
-                tags.push({ label: `FR: ${currentFilterFr}`, onRemove: () => selectFr('all') });
-            }
+            const condStr = currentFilterCond === 'above' ? '> Open' : (currentFilterCond === 'below' ? '< Open' : 'All');
+            document.getElementById('filterStatusText').innerHTML = `Filtering by: <b>${currentFilterTf.toUpperCase()} | ${condStr}</b>`;
 
-            if (currentFilterVol > 0) {
-                tags.push({ label: `Vol > ${formatVolume(currentFilterVol)}`, onRemove: () => selectVol(0) });
-            }
-
-            ['dev', '1d', '1w', '2w', '1m', '3m', '6m'].forEach(k => {
-                const minEl = document.getElementById(`min_${k}_input`);
-                const maxEl = document.getElementById(`max_${k}_input`);
-                const hasMin = minEl && minEl.value !== '';
-                const hasMax = maxEl && maxEl.value !== '';
-                if (hasMin || hasMax) {
-                    let name = k.toUpperCase();
-                    if (k === 'dev') name = `Dev.${currentFilterTf.toUpperCase()}`;
-                    let str = `${name}%: `;
-                    if (hasMin && hasMax) str += `${minEl.value} to ${maxEl.value}`;
-                    else if (hasMin) str += `≥ ${minEl.value}`;
-                    else str += `≤ ${maxEl.value}`;
-                    tags.push({
-                        label: str,
-                        onRemove: () => {
-                            if (minEl) minEl.value = '';
-                            if (maxEl) maxEl.value = '';
-                            onRangeChange();
-                        }
-                    });
-                }
-            });
-
-            tags.forEach(t => {
-                const el = document.createElement('span');
-                el.className = 'cr-tag';
-                el.innerHTML = `<span>${t.label}</span><span class="cr-tag-remove">✕</span>`;
-                el.querySelector('.cr-tag-remove').onclick = t.onRemove;
-                container.appendChild(el);
-            });
+            renderView();
         }
 
         function updateStats() {
@@ -1571,11 +1103,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             } else {
                 document.getElementById('statAvgDist').innerText = '0.00%';
             }
-
-            document.getElementById('th_open_active').innerText = `Open (${currentFilterTf.toUpperCase()})`;
-            document.getElementById('th_diff_pct').innerText = `🔥 % Dev. (${currentFilterTf.toUpperCase()}) ⬍`;
-            const devLabel = document.getElementById('crDevLabel');
-            if (devLabel) devLabel.innerText = `Dev. (${currentFilterTf.toUpperCase()}) %`;
         }
 
         async function fetchScan(force = false) {
@@ -1614,6 +1141,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const search = document.getElementById('searchInput').value.toUpperCase().trim();
             const minMc = parseAmount(document.getElementById('minMcInput').value);
             const maxMc = parseAmount(document.getElementById('maxMcInput').value);
+            const frFilter = document.getElementById('frSelect').value;
+            const minVol = parseFloat(document.getElementById('minVolSelect').value) || 0;
 
             const aboveKey = `above_${currentFilterTf}`;
             const pctKey = `pct_${currentFilterTf}`;
@@ -1621,11 +1150,11 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             const minDev = parseFloat(document.getElementById('min_dev_input').value);
             const maxDev = parseFloat(document.getElementById('max_dev_input').value);
 
-            const tfRangeFilters = {};
+            const tfRanges = {};
             ['1d', '1w', '2w', '1m', '3m', '6m'].forEach(tf => {
                 const minEl = document.getElementById(`min_${tf}_input`);
                 const maxEl = document.getElementById(`max_${tf}_input`);
-                tfRangeFilters[tf] = {
+                tfRanges[tf] = {
                     min: minEl && minEl.value !== '' ? parseFloat(minEl.value) : NaN,
                     max: maxEl && maxEl.value !== '' ? parseFloat(maxEl.value) : NaN
                 };
@@ -1634,30 +1163,30 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             let filtered = allTokens.filter(t => {
                 if (currentFilterCond === 'above' && !t[aboveKey]) return false;
                 if (currentFilterCond === 'below' && t[aboveKey]) return false;
-                if (currentFilterVol > 0 && t.volume_24h < currentFilterVol) return false;
+                if (minVol > 0 && t.volume_24h < minVol) return false;
                 if (search && !t.symbol.toUpperCase().includes(search) && !t.base.toUpperCase().includes(search)) return false;
 
-                if (minMc !== null && minMc > 0) {
-                    if (!t.market_cap || t.market_cap < minMc) return false;
-                }
-                if (maxMc !== null && maxMc > 0) {
-                    if (!t.market_cap || t.market_cap > maxMc) return false;
-                }
+                // MC
+                if (minMc !== null && minMc > 0 && (!t.market_cap || t.market_cap < minMc)) return false;
+                if (maxMc !== null && maxMc > 0 && (!t.market_cap || t.market_cap > maxMc)) return false;
 
-                if (currentFilterFr === 'neg' && t.funding_rate >= 0) return false;
-                if (currentFilterFr === 'neg_deep' && t.funding_rate >= -0.05) return false;
-                if (currentFilterFr === 'pos' && t.funding_rate <= 0) return false;
-                if (currentFilterFr === 'pos_high' && t.funding_rate <= 0.03) return false;
+                // FR
+                if (frFilter === 'neg' && t.funding_rate >= 0) return false;
+                if (frFilter === 'neg_deep' && t.funding_rate >= -0.05) return false;
+                if (frFilter === 'pos' && t.funding_rate <= 0) return false;
+                if (frFilter === 'pos_high' && t.funding_rate <= 0.03) return false;
 
+                // Dev %
                 const curDev = t[pctKey];
                 if (!isNaN(minDev) && curDev < minDev) return false;
                 if (!isNaN(maxDev) && curDev > maxDev) return false;
 
+                // Timeframe %
                 for (const tf of ['1d', '1w', '2w', '1m', '3m', '6m']) {
-                    const range = tfRangeFilters[tf];
+                    const r = tfRanges[tf];
                     const val = t[`pct_${tf}`];
-                    if (!isNaN(range.min) && val < range.min) return false;
-                    if (!isNaN(range.max) && val > range.max) return false;
+                    if (!isNaN(r.min) && val < r.min) return false;
+                    if (!isNaN(r.max) && val > r.max) return false;
                 }
 
                 return true;
@@ -1685,7 +1214,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         function renderView() {
             const filtered = getFilteredTokens();
             document.getElementById('resultCount').innerText = filtered.length;
-            updateActiveTags();
 
             if (currentView === 'cards') {
                 renderCards(filtered);
@@ -1732,12 +1260,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                             <span style="color:var(--text-dim); font-size:11px;">#${index + 1}</span>
                             <span>${t.base}</span>
                             <span class="symbol-sub">USDT</span>
-                            <button class="info-btn"
-                                    onmouseenter="showInfoTooltip(event, '${t.symbol}')"
-                                    onmouseleave="hideInfoTooltip()"
-                                    ontouchstart="showInfoTooltip(event, '${t.symbol}')"
-                                    ontouchend="hideInfoTooltip()"
-                                    onclick="openTokenModal('${t.symbol}')">i</button>
                             ${strengthBadge}
                         </div>
                         <div class="card-price-display">$${formatNumber(t.current_price)}</div>
@@ -1800,12 +1322,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
                     <td class="col-sticky-2">
                         <span class="symbol-cell">${t.base}</span>
                         <span class="symbol-sub">USDT</span>
-                        <button class="info-btn"
-                                onmouseenter="showInfoTooltip(event, '${t.symbol}')"
-                                onmouseleave="hideInfoTooltip()"
-                                ontouchstart="showInfoTooltip(event, '${t.symbol}')"
-                                ontouchend="hideInfoTooltip()"
-                                onclick="openTokenModal('${t.symbol}')">i</button>
                     </td>
                     <td style="font-weight:600;">$${formatNumber(t.current_price)}</td>
                     <td>${getFundingBadge(t.funding_rate)}</td>
@@ -1832,7 +1348,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         function exportCSV() {
             const minMc = parseAmount(document.getElementById('minMcInput').value) || 0;
             const maxMc = parseAmount(document.getElementById('maxMcInput').value) || 0;
-            window.location.href = `/api/export-csv?timeframe=${currentFilterTf}&condition=${currentFilterCond}&min_vol=${currentFilterVol}&fr=${currentFilterFr}&min_mc=${minMc}&max_mc=${maxMc}`;
+            const fr = document.getElementById('frSelect').value || 'all';
+            const minVol = parseFloat(document.getElementById('minVolSelect').value) || 0;
+            window.location.href = `/api/export-csv?timeframe=${currentFilterTf}&condition=${currentFilterCond}&min_vol=${minVol}&fr=${fr}&min_mc=${minMc}&max_mc=${maxMc}`;
         }
 
         // Auto initial fetch
